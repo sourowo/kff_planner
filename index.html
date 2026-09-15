@@ -414,6 +414,9 @@ const OPENDAY = {};              // 場次很多的作品（XR），展開時目
    小工具
    ============================================================ */
 const $ = id => document.getElementById(id);
+// 影展期間的日期（排除展前），給日期列與自動排片用
+const festDays = () => [...new Set(ALL.map(s => s.date))]
+  .filter(d => !FEST_START || d >= FEST_START).sort();
 const WEEK = ["日","一","二","三","四","五","六"];
 const toDate = iso => new Date(iso);
 // 時間一律從 "2026-10-17T14:30:00+08:00" 字串直接取，不受使用者電腦時區影響
@@ -659,12 +662,11 @@ function fillSelect(el, pairs, allLabel){
   if(pairs.some(([v]) => v === keep)) el.value = keep;
 }
 function renderDays(){
-  const days = [...new Set(ALL.map(s => s.date))].sort();
+  const days = festDays();
   const pickedDays = new Set(picked().map(s => s.date));
-  const fest = days.filter(d => d >= FEST_START).length;
   const chips = [["", "全部", `${days.length} 天`]].concat(days.map(d => {
     const x = ymdParts(d);
-    return [d, `${x.m}/${x.d}`, d < FEST_START ? "展前" : WEEK[x.w]];
+    return [d, `${x.m}/${x.d}`, WEEK[x.w]];
   }));
   $("days").innerHTML = chips.map(([v,a,b]) =>
     `<button class="dchip ${pickedDays.has(v)?"has":""}" data-d="${v}" aria-pressed="${v===DAY}">
@@ -1164,7 +1166,7 @@ function autoPlan(){
 }
 
 function renderAuto(){
-  const days = [...new Set(ALL.map(s => s.date))].sort();
+  const days = festDays();
   $("avail").innerHTML = days.map(d => {
     const x = ymdParts(d);
     return `<button class="dchip" data-avail="${d}" aria-pressed="${AVAIL.has(d)}"><b class="num">${x.m}/${x.d}</b><small>${WEEK[x.w]}</small></button>`;
@@ -1813,11 +1815,12 @@ function start(data){
   $("dataInfo").textContent =
     `${dayLabel(fd[0])} ～ ${dayLabel(fd[1])}・長短片 ${cnt("film")} 場・XR ${(data.xr_programs||[]).length} 部・活動 ${(data.events||[]).length} 項`;
   const today = new Date(Date.now() + 8*3600e3).toISOString().slice(0,10);
-  DAY = days.includes(today) ? today : (fd[0] || days[0]);
+  const fdays = festDays();
+  DAY = fdays.includes(today) ? today : (fdays[0] || "");
   refreshSelects();
   buildFilms();
   const saved = loadJson(AVAIL_KEY, null);
-  AVAIL = new Set((saved || days.filter(d => d >= FEST_START)).filter(d => days.includes(d)));
+  AVAIL = new Set((saved || fdays).filter(d => fdays.includes(d)));
   renderAll();
 }
 function embedded(){ return JSON.parse($("embedded").textContent); }
