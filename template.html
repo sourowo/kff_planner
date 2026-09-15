@@ -1,0 +1,1838 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2026 高雄電影節_排片小工具</title>
+<style>
+/* ============================================================
+   設計基調（沿用 movie-project）
+   深松綠當主色，衝突用磚紅，太趕用赭黃。
+   時間全部用等寬數字（tabular-nums），時刻表才會對齊。
+   ============================================================ */
+:root{
+  --paper:#FBFAF7; --ink:#16161A; --muted:#74736E; --line:#E4E2DC;
+  --pine:#1F4D46; --clash:#B23B32; --tight:#A9641E; --card:#FFFFFF;
+  --star:#8A5A00;
+  --heart:#B8434A;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;
+  background:var(--paper);color:var(--ink);line-height:1.6;font-size:15px;
+  padding-bottom:96px;
+}
+.wrap{max-width:640px;margin:0 auto;padding:0 16px}
+time,.num{font-variant-numeric:tabular-nums}
+
+header{padding:28px 0 20px;border-bottom:1px solid var(--line);margin-bottom:20px}
+h1{font-size:26px;font-weight:700;letter-spacing:-.02em}
+.sub{color:var(--muted);font-size:13px;margin-top:4px}
+
+.tabs{display:flex;gap:4px;margin-bottom:20px}
+.tab{flex:1;padding:10px;border:1px solid var(--line);background:transparent;border-radius:8px;
+  font:inherit;font-size:14px;color:var(--muted);cursor:pointer}
+.tab[aria-selected="true"]{background:var(--pine);border-color:var(--pine);color:#fff}
+.tab:focus-visible{outline:2px solid var(--pine);outline-offset:2px}
+
+/* 日期橫向捲動列：影展只有 18 天，一眼看完比下拉選單好用 */
+.days{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:14px;scrollbar-width:thin}
+.dchip{flex:none;min-width:52px;padding:6px 8px;border:1px solid var(--line);border-radius:8px;
+  background:var(--card);font:inherit;cursor:pointer;text-align:center;line-height:1.3;color:var(--ink)}
+.dchip b{display:block;font-size:15px}
+.dchip small{font-size:11px;color:var(--muted)}
+.dchip[aria-pressed="true"]{background:var(--pine);border-color:var(--pine);color:#fff}
+.dchip[aria-pressed="true"] small{color:#CFE0DB}
+.dchip .dot{display:block;width:5px;height:5px;border-radius:50%;margin:3px auto 0;background:transparent}
+.dchip.has .dot{background:var(--pine)}
+.dchip[aria-pressed="true"].has .dot{background:#fff}
+.dchip:focus-visible{outline:2px solid var(--pine);outline-offset:2px}
+
+.filters{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.filters label{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}
+select,input[type=search]{width:100%;padding:9px 10px;font:inherit;font-size:14px;
+  border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink)}
+.filters .full{grid-column:1/-1}
+select:focus,input:focus{outline:2px solid var(--pine);outline-offset:-1px}
+
+.toggles{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px}
+.tg{padding:5px 10px;border:1px solid var(--line);border-radius:999px;background:var(--card);
+  font:inherit;font-size:12.5px;color:var(--muted);cursor:pointer}
+.tg[aria-pressed="true"]{border-color:var(--pine);color:var(--pine);background:#F2F6F4}
+.tg.danger{margin-left:auto;color:var(--clash);border-color:#E7C3BF}
+.tg.danger[disabled]{color:var(--muted);border-color:var(--line);cursor:default;opacity:.6}
+.tg:focus-visible{outline:2px solid var(--pine);outline-offset:2px}
+
+.count{font-size:13px;color:var(--muted);margin:14px 0 8px}
+.vhead{font-size:13px;font-weight:600;color:var(--muted);margin:16px 0 6px}
+
+.row{display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;background:var(--card);
+  border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:8px;
+  font:inherit;color:inherit;cursor:pointer}
+.row:focus-visible{outline:2px solid var(--pine);outline-offset:2px}
+.row[data-picked="1"]{border-color:var(--pine);background:#F2F6F4}
+.row[data-past="1"]{opacity:.5}
+.row .when{min-width:52px;font-size:17px;font-weight:600}
+.row .when small{display:block;font-size:11.5px;font-weight:400;color:var(--muted)}
+.row .body{flex:1;min-width:0}
+.row .sec{display:block;font-size:12px;font-weight:600;color:var(--pine);margin-bottom:1px}
+.row .title{display:block;font-weight:600;word-break:break-word}
+.row .en{display:block;font-size:12px;color:var(--muted);word-break:break-word}
+.row .meta{display:block;font-size:12.5px;color:var(--muted);margin-top:2px}
+.row .mark{width:22px;height:22px;flex:none;border-radius:50%;border:1.5px solid var(--line);
+  display:grid;place-items:center;font-size:13px;color:transparent;margin-top:2px}
+.row[data-picked="1"] .mark{background:var(--pine);border-color:var(--pine);color:#fff}
+/* 選這場會撞到片單裡的某場 → 左側提示 */
+.row[data-hit="bad"]:not([data-picked="1"]){border-left:3px solid var(--clash)}
+.row[data-hit="warn"]:not([data-picked="1"]){border-left:3px solid var(--tight)}
+.hitnote{display:block;font-size:12px;margin-top:3px}
+.row[data-hit="bad"] .hitnote{color:var(--clash)}
+.row[data-hit="warn"] .hitnote{color:var(--tight)}
+
+.tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}
+.tag{font-size:11px;padding:1px 6px;border:1px solid var(--line);border-radius:4px;color:var(--muted)}
+.tag.rate{border-color:#C9D6D2;color:var(--pine)}
+.tag.r18{border-color:#E7C3BF;color:var(--clash)}
+.tag.talk{border-color:#E6D3A8;color:var(--star)}
+.tag.free{border-color:#C9D6D2;color:var(--pine)}
+
+.day{margin-bottom:26px}
+.day h2{font-size:15px;font-weight:600;margin-bottom:10px}
+.slot{display:flex;gap:12px;align-items:stretch}
+.rail{min-width:52px;padding-top:12px;font-size:15px;font-weight:600}
+.rail .end{display:block;font-size:12px;font-weight:400;color:var(--muted)}
+.slot .card{flex:1;background:var(--card);border:1px solid var(--line);border-left:3px solid var(--pine);
+  border-radius:8px;padding:11px 13px;min-width:0}
+.slot.bad .card{border-left-color:var(--clash)}
+.slot.warn .card{border-left-color:var(--tight)}
+.slot .card .sec{font-size:12px;font-weight:600;color:var(--pine)}
+.slot .card .title{font-weight:600;word-break:break-word}
+.slot .card .meta{font-size:12.5px;color:var(--muted);margin-top:2px}
+.drop{background:none;border:none;font:inherit;font-size:12.5px;color:var(--clash);
+  cursor:pointer;padding:4px 0 0;text-decoration:underline}
+.gap{display:flex;gap:12px;align-items:center;font-size:12.5px;padding:6px 0}
+.gap .rail{min-width:52px;padding:0}
+.gap .txt{flex:1;color:var(--muted)}
+.gap.warn .txt{color:var(--tight);font-weight:600}
+.gap.bad .txt{color:var(--clash);font-weight:600}
+
+.summary{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px;
+  margin-bottom:22px;font-size:13.5px}
+.summary p+p{margin-top:4px}
+.summary .dup{color:var(--tight)}
+
+.dock{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:12px 0}
+.dock .wrap{display:flex;gap:10px;align-items:center}
+.dock .n{flex:1;font-size:13.5px}
+.btn{padding:10px 16px;border:none;border-radius:8px;background:var(--pine);color:#fff;
+  font:inherit;font-size:14px;font-weight:600;cursor:pointer}
+.btn[disabled]{background:var(--line);color:var(--muted);cursor:default}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--ink);font-weight:400}
+.btn.ghost[disabled]{color:var(--muted)}
+.btn:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+
+dialog{margin:auto;max-height:calc(100% - 24px);overflow:auto;border:none;border-radius:14px;padding:0;max-width:min(520px,calc(100% - 24px));width:100%;
+  color:var(--ink);background:var(--paper);box-shadow:0 12px 40px rgba(22,22,26,.25)}
+dialog::backdrop{background:rgba(22,22,26,.45)}
+.dlg{padding:20px}
+.dlg h2{font-size:18px}
+.dlgsub{font-size:13px;color:var(--muted);margin:2px 0 14px}
+.dlgfoot{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
+.imgout{margin-top:12px}
+.imgout{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.imgout.wide{grid-template-columns:1fr}
+.imgout figure{margin:0}
+.imgout > p{grid-column:1/-1}
+.imgout img{display:block;width:100%;height:auto;border:1px solid var(--line);border-radius:8px}
+.imgout figcaption{display:flex;justify-content:space-between;align-items:center;font-size:12.5px;color:var(--muted);margin-top:6px}
+.imgout .dl{color:var(--pine);font-weight:600}
+.planbar{display:flex;gap:8px;margin-top:10px}
+.empty{text-align:center;color:var(--muted);padding:48px 20px;font-size:14px}
+.empty strong{display:block;color:var(--ink);font-size:16px;margin-bottom:6px}
+.hide{display:none}
+
+/* ---------- 選電影 ---------- */
+.intro{font-size:13.5px;color:var(--muted);margin-bottom:14px}
+.film{display:flex;gap:12px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+  border-radius:10px;padding:12px 14px;margin-bottom:8px}
+.film[data-liked="1"]{border-color:var(--heart);background:#FBF3F2}
+.film .body{flex:1;min-width:0}
+.film .title{display:block;font-weight:600;word-break:break-word}
+.film .en{display:block;font-size:12px;color:var(--muted);word-break:break-word}
+.film .meta{display:block;font-size:12.5px;color:var(--muted);margin-top:2px}
+.film .state{font-size:12px;margin-top:4px;color:var(--pine)}
+.film .state.none{color:var(--clash)}
+.heart{flex:none;width:40px;height:40px;border-radius:50%;border:1.5px solid var(--line);background:var(--card);
+  font-size:18px;line-height:1;color:var(--line);cursor:pointer;display:grid;place-items:center}
+.heart[aria-pressed="true"]{border-color:var(--heart);background:var(--heart);color:#fff}
+.heart:focus-visible,.link:focus-visible{outline:2px solid var(--pine);outline-offset:2px}
+.link{background:none;border:none;font:inherit;font-size:12.5px;color:var(--pine);cursor:pointer;
+  padding:4px 0 0;text-decoration:underline}
+.shead{font-size:14px;font-weight:700;margin:22px 0 8px;display:flex;justify-content:space-between;gap:8px}
+.shead small{font-weight:400;color:var(--muted);font-size:12px;white-space:nowrap}
+.shows{list-style:none;margin-top:10px;border-top:1px solid var(--line)}
+.shows li{display:flex;gap:10px;align-items:center;padding:8px 0;border-bottom:1px dashed var(--line)}
+.shows li:last-child{border-bottom:none}
+.shows .t{min-width:96px;font-weight:600;line-height:1.35}
+.shows .t small{display:block;font-weight:400;font-size:12px;color:var(--muted)}
+.shows .i{flex:1;min-width:0;font-size:12.5px;color:var(--muted);line-height:1.45}
+.shows .i .warn{color:var(--tight)}
+.shows .i .bad{color:var(--clash)}
+.shows .i .star{color:var(--star)}
+.shows li[data-off="1"] .t{color:var(--muted)}
+.add{flex:none;padding:6px 12px;border-radius:8px;border:1px solid var(--pine);background:var(--card);
+  color:var(--pine);font:inherit;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap}
+.add[data-on="1"]{background:var(--pine);color:#fff}
+.add[data-hit="bad"]:not([data-on="1"]){border-color:var(--clash);color:var(--clash)}
+.add:focus-visible{outline:2px solid var(--pine);outline-offset:2px}
+.tag.kind{border-color:#BFC7E0;color:#34457A}
+.slots{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.slot-btn{min-width:64px;padding:6px 8px}
+.slotnote{font-size:12px;color:var(--muted);margin-top:6px}
+.slotnote .bad{color:var(--clash)}
+.slotnote .warn{color:var(--tight)}
+.xr-days{margin:10px 0 0;padding-bottom:4px}
+.xr-days .dchip{min-width:44px;padding:4px 6px}
+.xr-days .dchip b{font-size:13px}
+.dchip[data-off="1"]:not([aria-pressed="true"]){opacity:.45}
+.row .liked{color:var(--heart);margin-right:4px}
+
+/* 自動排片面板 */
+.auto{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:18px}
+.auto h2{font-size:15px;margin-bottom:4px}
+.auto .hint{font-size:12.5px;color:var(--muted);margin-bottom:10px}
+.auto .sublabel{font-size:12px;color:var(--muted);margin:10px 0 6px}
+.avail{display:flex;flex-wrap:wrap;gap:4px}
+.avail .dchip{min-width:44px;padding:4px 6px}
+.avail .dchip b{font-size:13px}
+.auto .actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;align-items:center}
+.proposal{margin-top:14px;border-top:1px solid var(--line);padding-top:12px;font-size:13.5px}
+.proposal h3{font-size:14px;margin-bottom:6px}
+.proposal ol{list-style:none}
+.proposal li{display:flex;gap:10px;padding:5px 0;border-bottom:1px dashed var(--line)}
+.proposal li .d{min-width:92px;color:var(--muted)}
+.proposal li .b{flex:1;min-width:0}
+.proposal .miss{color:var(--clash);margin-top:10px}
+.proposal .miss li .d{color:var(--clash)}
+.legend{font-size:12px;color:var(--muted);margin-top:20px;line-height:1.8}
+@media(prefers-reduced-motion:no-preference){.row{transition:border-color .12s,background .12s}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>2026 高雄電影節_排片小工具</h1>
+    <p class="sub" id="dataInfo">載入中…</p>
+  </header>
+
+  <div class="tabs" role="tablist">
+    <button class="tab" id="tabFilms" role="tab" aria-selected="false">選電影</button>
+    <button class="tab" id="tabFind" role="tab" aria-selected="true">找場次</button>
+    <button class="tab" id="tabList" role="tab" aria-selected="false">我的片單</button>
+  </div>
+
+  <section id="paneFilms" class="hide">
+    <p class="intro">先把想看的片、XR 作品或活動按 ♥，或點「場次」直接加入，也可以用下面的自動排片，一次挑好不會撞的場次。</p>
+
+    <div class="auto" id="auto">
+      <h2>自動排片</h2>
+      <p class="hint" id="autoHint"></p>
+      <p class="sublabel">可以去的日子</p>
+      <div class="avail" id="avail"></div>
+      <div class="actions">
+        <button class="tg" id="tTight" aria-pressed="false">允許偏趕的空檔</button>
+        <button class="tg" id="tFewDays" aria-pressed="true">盡量集中在少數幾天</button>
+      </div>
+      <div class="actions">
+        <button class="btn" id="btnPlan">幫我排場次</button>
+      </div>
+      <div id="proposal"></div>
+    </div>
+
+    <div class="filters">
+      <div class="full"><label for="mKind">類別</label><select id="mKind">
+        <option value="">全部</option><option value="film">長短片</option>
+        <option value="xr">XR DREAMLAND</option><option value="event">活動・講座・展覽</option>
+      </select></div>
+      <div><label for="mSection">主題</label><select id="mSection"></select></div>
+      <div><label for="mText">找片名</label><input type="search" id="mText" placeholder="中文或英文片名"></div>
+    </div>
+    <div class="toggles">
+      <button class="tg" id="mLiked" aria-pressed="false">♥ 只看喜歡的片</button>
+      <button class="tg" id="mTalk" aria-pressed="false">★ 有影人出席場次</button>
+      <button class="tg danger" id="btnClearLiked" disabled>清除喜歡</button>
+    </div>
+    <div id="films"></div>
+  </section>
+
+  <section id="paneFind">
+    <div class="days" id="days" aria-label="日期"></div>
+    <div class="filters">
+      <div><label for="fVenue">場館</label><select id="fVenue"></select></div>
+      <div><label for="fType">類別</label><select id="fType">
+        <option value="noxr">長短片＋活動</option>
+        <option value="">全部（含 XR 時段）</option>
+        <optgroup label="長短片">
+          <option value="k:film">全部長短片</option>
+          <option value="t:feature">長片</option>
+          <option value="t:short">短片競賽</option>
+          <option value="t:special">特殊票場次</option>
+        </optgroup>
+        <optgroup label="XR DREAMLAND">
+          <option value="k:xr">全部 XR</option>
+          <option value="t:xr">XR 一般票</option>
+          <option value="t:xr_special">XR 特殊票</option>
+        </optgroup>
+        <optgroup label="其他">
+          <option value="k:event">活動・講座・展覽</option>
+          <option value="free">免費</option>
+        </optgroup>
+      </select></div>
+      <div class="full"><label for="fSection">主題</label><select id="fSection"></select></div>
+      <div class="full"><label for="fMovie">影片</label><select id="fMovie"></select></div>
+      <div class="full">
+        <label for="fText">關鍵字</label>
+        <input type="search" id="fText" placeholder="片名或主題">
+      </div>
+    </div>
+    <div class="toggles">
+      <button class="tg" id="tLiked" aria-pressed="false">♥ 只看喜歡的片</button>
+      <button class="tg" id="tTalk" aria-pressed="false">★ 只看影人出席</button>
+      <button class="tg" id="tFit" aria-pressed="false">隱藏會撞到片單的場次</button>
+      <button class="tg" id="tAge" aria-pressed="false">隱藏 18+</button>
+    </div>
+    <p class="count" id="count"></p>
+    <div id="results"></div>
+    <p class="legend">XR 散場時間含約 10 分鐘設備配戴（估計），開演 5 分鐘後不再入場。<br>★ 影人出席　◎ 活動場　🎃 萬聖節抓馬派對　▲ 非英語發音且無英文字幕<br>
+      場次以官網及現場公告為準。長短片開演 20 分鐘後不再入場。</p>
+  </section>
+
+  <section id="paneList" class="hide">
+    <div id="plan"></div>
+  </section>
+</div>
+
+<div class="dock">
+  <div class="wrap">
+    <span class="n" id="dockText">片單是空的</span>
+    <button class="btn ghost" id="btnClear" disabled>清空</button>
+    <button class="btn" id="btnIcs" disabled>下載行事曆</button>
+  </div>
+</div>
+
+<dialog id="imgDlg" aria-labelledby="imgTitle">
+  <div class="dlg">
+    <h2 id="imgTitle">輸出行程表圖片</h2>
+    <p class="dlgsub">存到手機相簿，或直接分享給朋友。</p>
+    <div class="filters">
+      <div class="full"><label for="imgLayout">版面</label><select id="imgLayout">
+        <option value="week">週曆（一張一週）</option>
+        <option value="list">清單（依日期排列）</option>
+      </select></div>
+      <div><label for="imgDay">範圍</label><select id="imgDay"></select></div>
+      <div id="wkStartBox" class="hide"><label for="imgWeekStart">每週從</label><select id="imgWeekStart">
+        <option value="fest">開幕日（週五）開始</option>
+        <option value="mon">週一開始</option>
+      </select></div>
+      <div id="sizeBox"><label for="imgSize">尺寸</label><select id="imgSize">
+        <option value="portrait">直式 4:5（IG 貼文）</option>
+        <option value="square">方形 1:1</option>
+        <option value="story">直式 9:16（限時動態）</option>
+        <option value="landscape">橫式 16:9（電腦）</option>
+      </select></div>
+    </div>
+    <div id="imgOut" class="imgout" aria-live="polite"></div>
+    <div class="dlgfoot">
+      <button class="btn ghost" id="imgShare" hidden>分享</button>
+      <button class="btn ghost" id="imgClose">關閉</button>
+    </div>
+  </div>
+</dialog>
+
+<script id="embedded" type="application/json">__DATA__</script>
+<script>
+/* ============================================================
+   設定
+   ============================================================ */
+const DATA_URL = "kff2026_screenings.json";
+// 同一區（例：內惟 1 廳 → 2 廳、駁二各倉庫之間）至少留幾分鐘
+const BUFFER_SAME = 15;
+// 不同區之間至少留幾分鐘（含走路、等輕軌），是估計值，可依自己的交通方式調整
+const TRAVEL = {
+  "kfa|pier2":15, "kfa|lib":30, "kfa|neiwei":35,
+  "lib|pier2":30, "lib|neiwei":45, "neiwei|pier2":35,
+};
+const BUFFER_MOVE = 40;          // 表上沒有的組合
+function travelMin(a, b){
+  if(a === b) return BUFFER_SAME;
+  return TRAVEL[[a,b].sort().join("|")] ?? BUFFER_MOVE;
+}
+// XR 開演 5 分鐘後、長短片 20 分鐘後不再入場
+const LATE = {film:20, xr:5, event:null};
+const STORE_KEY = "kffPlanner.picked.v1";
+const LIKE_KEY = "kffPlanner.liked.v1";
+const AVAIL_KEY = "kffPlanner.days.v1";
+
+// 場館 → 所在建築（同建築換廳不用移動）與短名
+const PLACE = {
+  lib:       {place:"lib",    short:"市圖總館 7F"},
+  lib3f:     {place:"lib",    short:"市圖總館 3F"},
+  n1:        {place:"neiwei", short:"內惟 1 廳"},
+  n2:        {place:"neiwei", short:"內惟 2 廳"},
+  kfa:       {place:"kfa",    short:"電影館"},
+  kfa2f:     {place:"kfa",    short:"電影館 2F"},
+  kfa2f_room:{place:"kfa",    short:"電影館 2F 視聽室"},
+  kfa3f:     {place:"kfa",    short:"電影館 3F"},
+  kfa_stair: {place:"kfa",    short:"電影館 梯間"},
+  vr360:     {place:"pier2",  short:"VR 體感劇院 360 廳"},
+  vrzone:    {place:"pier2",  short:"VR 體感劇院 互動區"},
+  p3:        {place:"pier2",  short:"駁二 P3 倉庫"},
+  bike:      {place:"pier2",  short:"駁二 自行車倉庫"},
+  pinway:    {place:"pier2",  short:"駁二 PINWAY"},
+  pier2:     {place:"pier2",  short:"駁二藝術特區"},
+  taicca:    {place:"taicca", short:"文策院南部營運中心"},
+};
+const KIND_LABEL = {film:"長短片", xr:"XR DREAMLAND", event:"活動"};
+const RATE_LABEL = {"0+":"普遍級","6+":"保護級","12+":"輔12","15+":"輔15","18+":"限制級"};
+const TAG_LABEL = {filmmaker_talk:"★ 影人出席", audience_activity:"◎ 活動場",
+  halloween:"🎃 萬聖節場", no_english_subtitles:"▲ 無英文字幕",
+  multi_participant:"多人同步體驗・請準時", nudity:"含裸露", variable_length:"時長依進度，上限 45 分"};
+
+let ALL = [], PRICES = {}, FESTIVAL = "", SECTIONS = [];
+let PICKED_IDS = loadPicked();
+let DAY = "";
+let LIKED = new Set(loadJson(LIKE_KEY, []));
+let AVAIL = null;               // 可以去的日子（Set），啟動時決定
+let PROPOSAL = null;            // 自動排片的結果，按「加入片單」才寫進去
+let FILMS = [];                  // 每部片／XR 作品／活動一筆，附上場次
+let BYID = new Map();            // 場次 id → 場次
+let FEST_START = "", FEST_END = "";
+const OPEN = new Set();          // 選電影裡展開場次的片
+const OPENDAY = {};              // 場次很多的作品（XR），展開時目前看哪一天
+
+/* ============================================================
+   小工具
+   ============================================================ */
+const $ = id => document.getElementById(id);
+const WEEK = ["日","一","二","三","四","五","六"];
+const toDate = iso => new Date(iso);
+// 時間一律從 "2026-10-17T14:30:00+08:00" 字串直接取，不受使用者電腦時區影響
+const hhmm = iso => String(iso).slice(11,16);
+function ymdParts(ymd){
+  const [y,m,d] = ymd.split("-").map(Number);
+  return {m, d, w:new Date(Date.UTC(y,m-1,d)).getUTCDay()};
+}
+function dayLabel(ymd){
+  const {m,d,w} = ymdParts(ymd);
+  return `${m}/${d}（${WEEK[w]}）`;
+}
+function addMin(hm, m){
+  const x = +hm.slice(0,2)*60 + +hm.slice(3,5) + m;
+  return `${String(Math.floor(x/60)).padStart(2,"0")}:${String(x%60).padStart(2,"0")}`;
+}
+// 列表左欄的時間文字
+function whenText(s){
+  if(s.allDay) return {a:"全天", b:s.timeNote || ""};
+  return {a:hhmm(s.start), b: s.end ? `～${s.endEst ? "約" : ""}${hhmm(s.end)}` : ""};
+}
+function minText(m){
+  if(m < 60) return `${m} 分鐘`;
+  const h = Math.floor(m/60), r = m%60;
+  return r ? `${h} 小時 ${r} 分` : `${h} 小時`;
+}
+function escHtml(t){
+  return String(t??"").replace(/[&<>"']/g, c =>
+    ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+function loadJson(k, d){
+  try{ return JSON.parse(localStorage.getItem(k)) ?? d; }catch(e){ return d; }
+}
+function saveJson(k, v){
+  try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){}
+}
+function loadPicked(){
+  try{ return JSON.parse(localStorage.getItem(STORE_KEY)) || []; }catch(e){ return []; }
+}
+function savePicked(){
+  try{ localStorage.setItem(STORE_KEY, JSON.stringify(PICKED_IDS)); }catch(e){}
+}
+const picked = () => PICKED_IDS.map(id => BYID.get(id)).filter(Boolean)
+  .sort((a,b) => a.start < b.start ? -1 : 1);
+
+/* ============================================================
+   資料攤平：films / venues / screenings → 每場一列
+   ============================================================ */
+function normalize(data){
+  FESTIVAL = data.festival || "影展";
+  PRICES = data.ticket_prices || {};
+  SECTIONS = data.sections || [];
+  const films = Object.fromEntries(data.films.map(f => [f.id, f]));
+  const venues = Object.fromEntries(data.venues.map(v => [v.id, v]));
+  FEST_START = (data.dates || [])[0] || "";
+  FEST_END = (data.dates || [])[1] || "";
+  const iso = (d, hm) => `${d}T${hm}:00+08:00`;
+  const place = id => PLACE[id] || {place:id, short:(venues[id]||{}).name || id};
+  const rows = [];
+
+  // 長短片
+  data.screenings.forEach(s => {
+    const f = films[s.film_id] || {};
+    const p = place(s.venue_id);
+    rows.push({
+      kind:"film", id:s.id, date:s.date, start:iso(s.date, s.start), end:s.end ? iso(s.date, s.end) : null,
+      title:f.title_zh||"", en:f.title_en||"", film_id:s.film_id,
+      runtime:f.runtime_min, rating:f.rating,
+      section:f.section||"其他", sectionInferred:!!f.section_inferred,
+      venue_id:s.venue_id, venue:(venues[s.venue_id]||{}).name||s.venue_id,
+      short:p.short, place:p.place,
+      tags:s.tags||[], ticket:s.ticket||"feature", note:s.note||"",
+      freeflow: s.ticket === "free",      // 自由進出，不列入撞場檢查
+    });
+  });
+
+  // XR：排程規則展開成一個個時段。散場時間 = 片長 + 設備配戴時間（估計）
+  const setup = data.xr_setup_min ?? 10;
+  const dateRange = ([a, b]) => {
+    const out = []; const d = new Date(a+"T00:00:00Z"), e = new Date(b+"T00:00:00Z");
+    for(; d <= e; d.setUTCDate(d.getUTCDate()+1)) out.push(d.toISOString().slice(0,10));
+    return out;
+  };
+  (data.xr_programs || []).forEach(x => {
+    const p = place(x.venue_id);
+    const sch = x.schedule;
+    const plan = sch.type === "daily"
+      ? dateRange(sch.range).map(d => [d, sch.times])
+      : Object.entries(sch.times);
+    plan.forEach(([d, times]) => times.forEach(hm => rows.push({
+      kind:"xr", id:`${x.id}@${d}T${hm}`, date:d, start:iso(d, hm),
+      end:iso(d, addMin(hm, x.runtime_min + setup)), endEst:true,
+      title:x.title_zh, en:x.title_en, code:x.code, film_id:x.id,
+      runtime:x.runtime_min, rating:x.rating, seats:x.seats,
+      section:x.section, venue_id:x.venue_id, venue:(venues[x.venue_id]||{}).name||x.venue_id,
+      short:p.short, place:p.place, tags:x.tags||[], ticket:x.ticket||"xr", note:x.note||"",
+      freeflow:false,
+    })));
+  });
+
+  // 活動：跨日的活動每天一列；沒有時間的當成全天
+  (data.events || []).forEach(e => {
+    const p = place(e.venue_id);
+    const days = e.date_to ? dateRange([e.date, e.date_to]) : [e.date];
+    days.forEach(d => {
+      const allDay = !e.start;
+      rows.push({
+        kind:"event", id: days.length > 1 ? `${e.id}@${d}` : e.id, date:d,
+        start: iso(d, e.start || "00:00"), end: e.end ? iso(d, e.end) : null,
+        endEst: !!e.end_estimated, allDay, timeNote: allDay ? (e.note?.includes("時間") ? "時間未定" : "開放時間內") : "",
+        title:e.title, en:"", film_id:e.id, runtime:null, rating:null,
+        section:e.category, venue_id:e.venue_id, venue:(venues[e.venue_id]||{}).name||e.venue_id,
+        short:p.short, place:p.place, tags:[], ticket:"event", fee:e.fee||"",
+        note:[e.people, e.register, e.note].filter(Boolean).join("；"),
+        page:e.page, freeflow: allDay || !!e.free_flow,
+      });
+    });
+  });
+  return rows;
+}
+
+/* ============================================================
+   衝突判斷
+   bad  時間重疊   warn 空檔太短   ok 正常
+   ============================================================ */
+function relation(a, b){           // a 先開演
+  if(a.freeflow || b.freeflow) return null;
+  const aEnd = toDate(a.end || a.start);
+  const gap = Math.round((toDate(b.start) - aEnd) / 60000);
+  const same = a.place === b.place;
+  const need = travelMin(a.place, b.place);
+  const noEnd = !a.end ? "（上一場結束時間未定，請自行確認）"
+    : a.endEst ? "（散場時間為估計）" : "";
+  if(gap < 0) return {level:"bad", gap, text:`與上一場重疊 ${minText(-gap)}，無法都看`};
+  if(gap < need) return {level:"warn", gap, text: same
+    ? `只有 ${minText(gap)}空檔，換廳建議至少留 ${BUFFER_SAME} 分鐘${noEnd}`
+    : `只有 ${minText(gap)}空檔，從${a.short}到${b.short}約需 ${need} 分鐘${noEnd}`};
+  return {level:"ok", gap, text: same ? `空檔 ${minText(gap)}${noEnd}`
+    : `空檔 ${minText(gap)}，需移動到${b.short}${noEnd}`};
+}
+// 某場若加進片單，會和已選的哪一場最嚴重地衝突
+function hitWith(s){
+  let worst = null;
+  for(const p of picked()){
+    if(p.id === s.id || p.date !== s.date) continue;
+    const r = p.start <= s.start ? relation(p, s) : relation(s, p);
+    if(!r || r.level === "ok") continue;
+    if(!worst || (r.level === "bad" && worst.level !== "bad")) worst = {...r, other:p};
+  }
+  return worst;
+}
+
+/* ============================================================
+   匯出 .ics
+   ============================================================ */
+function esc(t){
+  return String(t||"").replace(/\\/g,"\\\\").replace(/;/g,"\\;")
+    .replace(/,/g,"\\,").replace(/\r?\n/g,"\\n");
+}
+function utc(d){
+  const p = n => String(n).padStart(2,"0");
+  return d.getUTCFullYear()+p(d.getUTCMonth()+1)+p(d.getUTCDate())+"T"
+    +p(d.getUTCHours())+p(d.getUTCMinutes())+p(d.getUTCSeconds())+"Z";
+}
+function fold(line){
+  const enc = new TextEncoder();
+  if(enc.encode(line).length <= 75) return line;
+  const out = []; let cur = "", len = 0;
+  for(const ch of line){
+    const n = enc.encode(ch).length;
+    if(len + n > 75){ out.push(cur); cur = " " + ch; len = 1 + n; }
+    else { cur += ch; len += n; }
+  }
+  out.push(cur);
+  return out.join("\r\n");
+}
+function eventDesc(s){
+  const lateMin = LATE[s.kind];
+  return [
+    s.en,
+    s.code ? `XR 作品編號 ${s.code}` : null,
+    `主題：${s.section}`,
+    s.venue,
+    s.runtime ? `片長 ${s.runtime} 分鐘` : null,
+    s.rating ? `分級 ${s.rating}` : null,
+    s.tags.map(t => TAG_LABEL[t]).filter(Boolean).join("、") || null,
+    s.seats ? `每場 ${s.seats} 人` : null,
+    s.fee ? `費用：${s.fee}` : null,
+    s.note || null,
+    s.kind === "xr" ? "結束時間含約 10 分鐘設備配戴（估計）" : null,
+    lateMin ? `開演 ${lateMin} 分鐘後不再入場` : null,
+  ].filter(Boolean).join("\n");
+}
+// "2026-10-17" → "2026-10-18"
+function nextDay(ymd){
+  const [y,m,d] = ymd.split("-").map(Number);
+  return new Date(Date.UTC(y, m-1, d+1)).toISOString().slice(0,10);
+}
+function endOf(s){
+  return s.end ? toDate(s.end) : new Date(toDate(s.start).getTime() + 120*60000);
+}
+
+function buildIcs(list){
+  const now = utc(new Date());
+  const L = ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//KFFPlanner//TW//ZH",
+    "CALSCALE:GREGORIAN","METHOD:PUBLISH","X-WR-CALNAME:"+esc(FESTIVAL)];
+  list.forEach(s => {
+    const start = toDate(s.start);
+    const end = s.end ? toDate(s.end) : new Date(start.getTime() + 120*60000);
+    const ymd = s.date.replaceAll("-","");
+    const next = nextDay(s.date).replaceAll("-","");
+    const desc = eventDesc(s);
+    L.push("BEGIN:VEVENT", fold(`UID:${s.id.replace(/[^\w-]/g,"_")}@kff2026.planner`), `DTSTAMP:${now}`);
+    if(s.allDay) L.push(`DTSTART;VALUE=DATE:${ymd}`, `DTEND;VALUE=DATE:${next}`);
+    else L.push(`DTSTART:${utc(start)}`, `DTEND:${utc(end)}`);
+    L.push(
+      fold(`SUMMARY:${esc(s.title)}`),
+      fold(`LOCATION:${esc(s.venue)}`),
+      fold(`DESCRIPTION:${esc(desc)}`));
+    if(!s.allDay) L.push("BEGIN:VALARM","ACTION:DISPLAY","TRIGGER:-PT45M",
+      fold(`DESCRIPTION:${esc(s.title)} 快開始了`),"END:VALARM");
+    L.push("END:VEVENT");
+  });
+  L.push("END:VCALENDAR");
+  return L.join("\r\n");
+}
+function downloadIcs(){
+  const list = picked();
+  if(!list.length) return;
+  const url = URL.createObjectURL(new Blob([buildIcs(list)], {type:"text/calendar;charset=utf-8"}));
+  const a = document.createElement("a");
+  a.href = url; a.download = "高雄電影節_我的片單.ics"; a.click();
+  URL.revokeObjectURL(url);
+}
+
+/* ============================================================
+   找場次
+   ============================================================ */
+function fillSelect(el, pairs, allLabel){
+  const keep = el.value;
+  el.innerHTML = `<option value="">${allLabel}</option>` +
+    pairs.map(([v,t]) => `<option value="${escHtml(v)}">${escHtml(t)}</option>`).join("");
+  if(pairs.some(([v]) => v === keep)) el.value = keep;
+}
+function renderDays(){
+  const days = [...new Set(ALL.map(s => s.date))].sort();
+  const pickedDays = new Set(picked().map(s => s.date));
+  const fest = days.filter(d => d >= FEST_START).length;
+  const chips = [["", "全部", `${days.length} 天`]].concat(days.map(d => {
+    const x = ymdParts(d);
+    return [d, `${x.m}/${x.d}`, d < FEST_START ? "展前" : WEEK[x.w]];
+  }));
+  $("days").innerHTML = chips.map(([v,a,b]) =>
+    `<button class="dchip ${pickedDays.has(v)?"has":""}" data-d="${v}" aria-pressed="${v===DAY}">
+      <b class="num">${a}</b><small>${b}</small><span class="dot"></span></button>`).join("");
+}
+function rank(sec){
+  const i = SECTIONS.indexOf(sec);
+  return i < 0 ? 999 : i;
+}
+function refreshSelects(){
+  const ty = $("fType").value;
+  const pool = ALL.filter(s => (!DAY || s.date === DAY) && matchType(s, ty));
+  const vs = [...new Map(pool.map(s => [s.venue_id, s.short])).entries()];
+  const order = Object.keys(PLACE);
+  vs.sort((a,b) => order.indexOf(a[0]) - order.indexOf(b[0]));
+  fillSelect($("fVenue"), vs, "全部場館");
+  const fs = [...new Map(pool.map(s => [s.film_id, s.title])).entries()]
+    .sort((a,b) => a[1].localeCompare(b[1], "zh-Hant"));
+  fillSelect($("fMovie"), fs, "全部影片");
+  // 主題依手冊順序排，後面附場次數
+  const cnt = {};
+  pool.forEach(s => cnt[s.section] = (cnt[s.section]||0) + 1);
+  const secs = Object.keys(cnt).sort((a,b) => rank(a) - rank(b));
+  fillSelect($("fSection"), secs.map(k => [k, `${k}（${cnt[k]}）`]), "全部主題");
+}
+const on = id => $(id).getAttribute("aria-pressed") === "true";
+
+function matchType(s, ty){
+  if(!ty) return true;
+  if(ty === "noxr") return s.kind !== "xr";
+  if(ty === "free") return s.ticket === "free" || (s.kind === "event" && /免費/.test(s.fee));
+  const [k, v] = ty.split(":");
+  return k === "k" ? s.kind === v : s.ticket === v;
+}
+function currentResults(){
+  const v = $("fVenue").value, m = $("fMovie").value, ty = $("fType").value, sec = $("fSection").value;
+  const t = $("fText").value.trim().toLowerCase();
+  const talk = on("tTalk"), fit = on("tFit"), age = on("tAge");
+  return ALL.filter(s =>
+    (!DAY || s.date === DAY) &&
+    (!v || s.venue_id === v) &&
+    (!m || s.film_id === m) &&
+    matchType(s, ty) &&
+    (!sec || s.section === sec) &&
+    (!t || [s.title, s.en, s.section, s.code, s.note].some(x => x && x.toLowerCase().includes(t))) &&
+    (!talk || s.tags.includes("filmmaker_talk")) &&
+    (!on("tLiked") || LIKED.has(s.film_id)) &&
+    (!age || s.rating !== "18+") &&
+    (!fit || PICKED_IDS.includes(s.id) || !hitWith(s) || hitWith(s).level !== "bad")
+  ).sort((a,b) => a.start < b.start ? -1 : 1);
+}
+
+function badgeHtml(s){
+  const out = [];
+  if(s.kind !== "film") out.push(`<span class="tag kind">${s.kind === "xr" ? "XR" : "活動"}</span>`);
+  if(s.rating){
+    const lab = s.kind === "xr" && s.rating === "0+" ? "普遍級・7 歲且 130cm 以上" : (RATE_LABEL[s.rating]||s.rating);
+    out.push(`<span class="tag ${s.rating==="18+"?"r18":"rate"}">${lab}</span>`);
+  }
+  if(s.runtime) out.push(`<span class="tag num">${s.runtime} 分</span>`);
+  s.tags.forEach(t => out.push(`<span class="tag ${t==="filmmaker_talk"?"talk":""}">${TAG_LABEL[t]||t}</span>`));
+  if(s.ticket === "special") out.push(`<span class="tag">特殊票 ${PRICES.special?.regular??""}</span>`);
+  if(s.ticket === "short") out.push(`<span class="tag">短片票</span>`);
+  if(s.seats) out.push(`<span class="tag num">每場 ${s.seats} 人</span>`);
+  if(s.ticket === "xr") out.push(`<span class="tag">XR 一般票</span>`);
+  if(s.ticket === "xr_special") out.push(`<span class="tag">XR 特殊票 ${PRICES.xr_special?.regular??""}</span>`);
+  if(s.ticket === "free" && s.kind === "xr") out.push(`<span class="tag free">免費索票</span>`);
+  if(s.kind === "film" && s.freeflow) out.push(`<span class="tag free">免費・自由進出</span>`);
+  if(s.kind === "event" && s.fee) out.push(`<span class="tag ${/免費/.test(s.fee)?"free":""}">${escHtml(s.fee)}</span>`);
+  if(s.page) out.push(`<span class="tag">手冊 p.${s.page}</span>`);
+  return `<span class="tags">${out.join("")}</span>`;
+}
+
+function rowHtml(s, picks, showDate){
+  const isOn = picks.has(s.id);
+  const hit = isOn ? null : hitWith(s);
+  const w = whenText(s);
+  const past = toDate(s.allDay ? s.date+"T23:59:00+08:00" : s.start) < new Date() ? "1" : "0";
+  const note = hit ? `<span class="hitnote">${hit.level==="bad"?"會撞到":"太趕："}《${escHtml(hit.other.title)}》${hhmm((hit.other.start))}</span>` : "";
+  return `
+  <button class="row" data-picked="${isOn?1:0}" data-hit="${hit?hit.level:""}" data-past="${past}" data-id="${s.id}">
+    <span class="mark">✓</span>
+    <span class="when num">${w.a}<small>${w.b}</small></span>
+    <span class="body">
+      <span class="sec">${escHtml(s.section)}</span>
+      <span class="title">${LIKED.has(s.film_id)?'<span class="liked" aria-label="喜歡">♥</span>':""}${escHtml(s.title)}</span>
+      ${s.en ? `<span class="en">${escHtml(s.en)}</span>` : ""}
+      <span class="meta">${s.code ? escHtml(s.code)+"・" : ""}${showDate ? dayLabel(s.date)+" " : ""}${escHtml(s.short)}${s.note?"・"+escHtml(s.note):""}</span>
+      ${badgeHtml(s)}
+      ${note}
+    </span>
+  </button>`;
+}
+
+function renderResults(){
+  const list = currentResults();
+  $("count").textContent = `${list.length} 場`;
+  if(!list.length){
+    $("results").innerHTML = `<p class="empty"><strong>這個組合沒有場次</strong>換個日期、場館或關掉篩選看看</p>`;
+    return;
+  }
+  const picks = new Set(PICKED_IDS);
+  const shown = list.slice(0, 300);        // 一次最多畫 300 筆，手機才不會卡
+  let html = "", last = null;
+  shown.forEach(s => {
+    const key = DAY ? null : s.date;
+    if(key && key !== last){ html += `<h3 class="vhead">${dayLabel(key)}</h3>`; last = key; }
+    html += rowHtml(s, picks, false);
+  });
+  if(list.length > shown.length)
+    html += `<p class="count">還有 ${list.length - shown.length} 場沒顯示，請選日期或縮小範圍</p>`;
+  $("results").innerHTML = html;
+}
+
+$("results").addEventListener("click", e => {
+  const row = e.target.closest(".row");
+  if(!row) return;
+  const id = row.dataset.id;
+  const i = PICKED_IDS.indexOf(id);
+  if(i >= 0) PICKED_IDS.splice(i,1); else PICKED_IDS.push(id);
+  savePicked();
+  renderResults(); renderDays(); renderDock();
+  const again = document.querySelector(`.row[data-id="${id}"]`);
+  if(again) again.focus();
+});
+
+/* ============================================================
+   我的片單
+   ============================================================ */
+function priceOf(s){
+  if(s.kind === "event" || s.freeflow || !PRICES[s.ticket]) return 0;
+  return PRICES[s.ticket].regular || 0;
+}
+function renderPlan(){
+  const list = picked();
+  if(!list.length){
+    $("plan").innerHTML = `<p class="empty"><strong>還沒有選任何場次</strong>
+      到「找場次」點選想看的片，這裡會幫你檢查時間會不會撞到</p>`;
+    return;
+  }
+  // 同一部片選了兩次
+  const cnt = {};
+  list.forEach(s => cnt[s.title] = (cnt[s.title]||0) + 1);
+  const dups = Object.keys(cnt).filter(k => cnt[k] > 1);
+  const total = list.reduce((a,s) => a + priceOf(s), 0);
+  const mins = list.reduce((a,s) => a + (s.freeflow ? 0 : (s.runtime||0)), 0);
+  let html = `<div class="summary">
+    <p>${list.length} 場，約 ${minText(mins)}</p>
+    <p class="num">單張全票估計 NT$${total.toLocaleString()}（影展期間票價；活動費用、早鳥、套票另計）</p>
+    ${dups.length ? `<p class="dup">重複選了：${dups.map(escHtml).join("、")}</p>` : ""}
+    <div class="planbar">
+      <button class="btn" id="btnImg">輸出行程表圖片</button>
+      <button class="btn ghost" id="btnIcs2">下載行事曆</button>
+    </div>
+  </div>`;
+
+  const byDay = {};
+  list.forEach(s => (byDay[s.date] = byDay[s.date] || []).push(s));
+  html += Object.keys(byDay).sort().map(d => {
+    const day = byDay[d];
+    let h = `<div class="day"><h2>${dayLabel(d)}</h2>`;
+    let prev = null;   // 目前為止結束最晚的那場，長片才不會漏判
+    day.forEach(s => {
+      let cls = "";
+      if(prev){
+        const r = relation(prev, s);
+        if(r){
+          cls = r.level === "ok" ? "" : r.level;
+          h += `<div class="gap ${cls}"><span class="rail"></span><span class="txt">${r.text}</span></div>`;
+        }
+      }
+      const w = whenText(s);
+      h += `
+      <div class="slot ${cls}">
+        <div class="rail num">${w.a}<span class="end">${w.b}</span></div>
+        <div class="card">
+          <div class="sec">${escHtml(s.section)}</div>
+          <div class="title">${escHtml(s.title)}</div>
+          <div class="meta">${s.code ? escHtml(s.code)+"・" : ""}${escHtml(s.venue)}${s.runtime?"・"+s.runtime+" 分鐘":""}${s.rating?"・"+s.rating:""}${s.fee?"・"+escHtml(s.fee):""}</div>
+          ${s.tags.length||s.note ? `<div class="meta">${[...s.tags.map(t=>TAG_LABEL[t]), s.note].filter(Boolean).map(escHtml).join("、")}</div>` : ""}
+          <button class="drop" data-id="${s.id}">移除</button>
+        </div>
+      </div>`;
+      if(!s.freeflow && (!prev || (s.end||s.start) > (prev.end||prev.start))) prev = s;
+    });
+    return h + `</div>`;
+  }).join("");
+  $("plan").innerHTML = html;
+}
+$("plan").addEventListener("click", e => {
+  if(e.target.id === "btnImg") return openImgDialog();
+  if(e.target.id === "btnIcs2") return downloadIcs();
+  const b = e.target.closest(".drop");
+  if(!b) return;
+  PICKED_IDS = PICKED_IDS.filter(x => x !== b.dataset.id);
+  savePicked(); renderAll();
+});
+
+
+/* ============================================================
+   選電影
+   ============================================================ */
+function buildFilms(){
+  const by = {};
+  ALL.forEach(s => {
+    const f = by[s.film_id] ||= {id:s.film_id, kind:s.kind, code:s.code, title:s.title, en:s.en,
+      runtime:s.runtime, rating:s.rating, section:s.section, seats:s.seats, short:s.short,
+      fee:s.fee, note:s.kind === "event" ? s.note : "", shows:[]};
+    f.shows.push(s);
+  });
+  FILMS = Object.values(by);
+  FILMS.forEach(f => f.shows.sort((a,b) => a.start < b.start ? -1 : 1));
+  FILMS.sort((a,b) => rank(a.section) - rank(b.section) || a.shows[0].start.localeCompare(b.shows[0].start));
+  refreshFilmSections();
+}
+function refreshFilmSections(){
+  const k = $("mKind").value;
+  const pool = FILMS.filter(f => !k || f.kind === k);
+  const secs = [...new Set(pool.map(f => f.section))];
+  fillSelect($("mSection"), secs.map(s => [s, `${s}（${pool.filter(f=>f.section===s).length}）`]), "全部主題");
+}
+const pickedFilmIds = () => new Set(picked().map(s => s.film_id));
+
+function filmMeta(f, days, talk){
+  const bits = [];
+  if(f.kind === "xr") bits.push(`${f.code}・${f.short}`);
+  if(f.kind === "event") bits.push(f.short);
+  if(f.runtime) bits.push(`${f.runtime} 分`);
+  if(f.rating) bits.push(f.kind === "xr" && f.rating === "0+" ? "普遍級（7 歲且 130cm 以上）" : (RATE_LABEL[f.rating]||f.rating));
+  if(f.seats) bits.push(`每場 ${f.seats} 人`);
+  const tk = f.shows[0].ticket;
+  if(tk === "xr_special") bits.push(`XR 特殊票 ${PRICES.xr_special?.regular ?? ""} 元`);
+  if(tk === "xr") bits.push(`XR 一般票 ${PRICES.xr?.regular ?? ""} 元`);
+  if(tk === "free" && f.kind === "xr") bits.push("免費索票");
+  if(f.fee) bits.push(f.fee);
+  bits.push(f.kind === "xr" ? `每天 ${Math.round(f.shows.length / new Set(f.shows.map(s=>s.date)).size)} 場左右・${days}`
+    : `${f.shows.length} 場：${days}`);
+  if(talk) bits.push("★ 有影人出席");
+  return bits.map(escHtml).join("・");
+}
+function filmCard(f, inPlan){
+  const liked = LIKED.has(f.id);
+  const allDays = [...new Set(f.shows.map(s => s.date))];
+  const dl = d => dayLabel(d).replace(/（.）/,"");
+  const days = allDays.length > 4 ? `${dl(allDays[0])}–${dl(allDays[allDays.length-1])} 每天` : allDays.map(dl).join("、");
+  const talk = f.shows.some(s => s.tags.includes("filmmaker_talk"));
+  const avail = f.shows.filter(s => AVAIL.has(s.date)).length;
+  let state = "";
+  if(inPlan.has(f.id)){
+    const mine = picked().filter(p => p.film_id === f.id);
+    state = `<span class="state">已排：${mine.map(s => `${dayLabel(s.date)} ${whenText(s).a}`).join("、")}</span>`;
+  }else if(liked && !avail){
+    state = `<span class="state none">可以去的日子裡沒有這部片的場次</span>`;
+  }
+  return `
+  <div class="film" data-liked="${liked?1:0}">
+    <div class="body">
+      <span class="title">${escHtml(f.title)}</span>
+      ${f.en ? `<span class="en">${escHtml(f.en)}</span>` : ""}
+      <span class="meta">${filmMeta(f, days, talk)}</span>
+      ${f.note ? `<span class="meta">${escHtml(f.note)}</span>` : ""}
+      ${state}
+      <button class="link" data-toggle="${f.id}" aria-expanded="${OPEN.has(f.id)}">${OPEN.has(f.id) ? "收起場次" : `場次（${f.shows.length}）`}</button>
+      ${OPEN.has(f.id) ? showList(f) : ""}
+    </div>
+    <button class="heart" data-like="${f.id}" aria-pressed="${liked}" aria-label="${liked?"取消喜歡":"喜歡"}《${escHtml(f.title)}》">♥</button>
+  </div>`;
+}
+
+
+// 卡片展開後的場次清單，每場可以直接加入／移除
+function slotGrid(f){
+  const ids = new Set(PICKED_IDS);
+  const dates = [...new Set(f.shows.map(s => s.date))];
+  const mine = f.shows.filter(s => ids.has(s.id));
+  let day = OPENDAY[f.id];
+  if(!dates.includes(day)) day = mine[0]?.date || dates.find(d => AVAIL?.has(d)) || dates[0];
+  OPENDAY[f.id] = day;
+  const chips = dates.map(d => {
+    const x = ymdParts(d);
+    const has = mine.some(s => s.date === d);
+    return `<button class="dchip ${has?"has":""}" data-openday="${f.id}|${d}" aria-pressed="${d===day}"
+      ${AVAIL && !AVAIL.has(d) ? 'data-off="1"' : ""}><b class="num">${x.m}/${x.d}</b><small>${WEEK[x.w]}</small><span class="dot"></span></button>`;
+  }).join("");
+  const slots = f.shows.filter(s => s.date === day).map(s => {
+    const isOn = ids.has(s.id);
+    const hit = isOn ? null : hitWith(s);
+    const title = hit ? `${hit.level==="bad"?"會撞到":"太趕："}《${hit.other.title}》${hhmm(hit.other.start)}` : "";
+    return `<button class="add slot-btn num" data-add="${s.id}" data-on="${isOn?1:0}" data-hit="${hit?hit.level:""}"
+      title="${escHtml(title)}" aria-label="${isOn?"移除":"加入"} ${dayLabel(s.date)} ${hhmm(s.start)} ${escHtml(title)}">${isOn?"✓ ":""}${hhmm(s.start)}</button>`;
+  }).join("");
+  // 衝突原因直接列出來（手機沒有滑鼠提示）
+  const hits = f.shows.filter(s => s.date === day && !ids.has(s.id))
+    .map(s => [s, hitWith(s)]).filter(([,h]) => h);
+  const legend = hits.length ? `<p class="slotnote">` + hits.map(([s,h]) =>
+    `<span class="${h.level}">${hhmm(s.start)} ${h.level==="bad"?"會撞到":"太趕："}《${escHtml(h.other.title)}》${hhmm(h.other.start)}</span>`
+  ).join("<br>") + `</p>` : "";
+  return `<div class="xr-days days">${chips}</div>
+    <p class="slotnote">每場約 ${f.runtime + 10} 分鐘（含設備配戴），開演 5 分鐘後不能入場</p>
+    <div class="slots">${slots}</div>${legend}
+    ${mine.length ? `<p class="slotnote">已加入：${mine.map(s => `${dayLabel(s.date)} ${hhmm(s.start)}`).join("、")}</p>` : ""}`;
+}
+function showList(f){
+  if(f.shows.length > 12) return slotGrid(f);
+  const ids = new Set(PICKED_IDS);
+  return `<ul class="shows">` + f.shows.map(s => {
+    const isOn = ids.has(s.id);
+    const hit = isOn ? null : hitWith(s);
+    const talk = s.tags.includes("filmmaker_talk");
+    const other = s.tags.filter(x => x !== "filmmaker_talk").map(x => TAG_LABEL[x]).filter(Boolean);
+    const info = [
+      escHtml(s.short),
+      talk ? `<span class="star">★ 影人出席</span>` : "",
+      other.join("、"),
+      s.note ? escHtml(s.note) : "",
+    ].filter(Boolean).join("・");
+    const warn = hit ? `<br><span class="${hit.level}">${hit.level==="bad"?"會撞到":"太趕："}《${escHtml(hit.other.title)}》${hhmm(hit.other.start)}</span>` : "";
+    const off = AVAIL && !AVAIL.has(s.date) ? `<br>不在你可以去的日子` : "";
+    return `<li data-off="${AVAIL && !AVAIL.has(s.date) ? 1 : 0}">
+      <span class="t num">${dayLabel(s.date)}<small>${whenText(s).a}${whenText(s).b}</small></span>
+      <span class="i">${info}${warn}${off}</span>
+      <button class="add" data-add="${s.id}" data-on="${isOn?1:0}" data-hit="${hit?hit.level:""}"
+        aria-label="${isOn?"移除":"加入"} ${dayLabel(s.date)} ${hhmm(s.start)} 《${escHtml(s.title)}》">${isOn ? "✓ 已加入" : "加入"}</button>
+    </li>`;
+  }).join("") + `</ul>`;
+}
+
+function renderFilmsPane(){
+  renderAuto();
+  const nLiked = FILMS.filter(f => LIKED.has(f.id)).length;
+  $("btnClearLiked").disabled = !nLiked;
+  $("btnClearLiked").textContent = nLiked ? `清除喜歡（${nLiked}）` : "清除喜歡";
+  const sec = $("mSection").value, t = $("mText").value.trim().toLowerCase(), k = $("mKind").value;
+  const list = FILMS.filter(f =>
+    (!k || f.kind === k) &&
+    (!sec || f.section === sec) &&
+    (!t || [f.title, f.en, f.code, f.section].some(x => x && x.toLowerCase().includes(t))) &&
+    (!on("mLiked") || LIKED.has(f.id)) &&
+    (!on("mTalk") || f.shows.some(s => s.tags.includes("filmmaker_talk"))));
+  if(!list.length){
+    $("films").innerHTML = on("mLiked") && !LIKED.size
+      ? `<p class="empty"><strong>還沒有喜歡的片</strong>關掉「只看喜歡的片」，在想看的片按 ♥</p>`
+      : `<p class="empty"><strong>沒有符合的影片</strong>換個主題或關鍵字看看</p>`;
+    return;
+  }
+  const inPlan = pickedFilmIds();
+  let html = "", last = null;
+  list.forEach(f => {
+    if(f.section !== last){
+      const n = list.filter(x => x.section === f.section);
+      const lk = n.filter(x => LIKED.has(x.id)).length;
+      html += `<h3 class="shead">${escHtml(f.section)}<small>${n.length} ${f.kind === "event" ? "項" : "部"}${lk ? `・♥ ${lk}` : ""}</small></h3>`;
+      last = f.section;
+    }
+    html += filmCard(f, inPlan);
+  });
+  $("films").innerHTML = html;
+}
+
+$("films").addEventListener("click", e => {
+  const h = e.target.closest("[data-like]");
+  if(h){
+    const id = h.dataset.like;
+    LIKED.has(id) ? LIKED.delete(id) : LIKED.add(id);
+    saveJson(LIKE_KEY, [...LIKED]);
+    PROPOSAL = null;
+    renderFilmsPane(); renderDock();
+    document.querySelector(`[data-like="${id}"]`)?.focus();
+    return;
+  }
+  const od = e.target.closest("[data-openday]");
+  if(od){
+    const [fid, d] = od.dataset.openday.split("|");
+    OPENDAY[fid] = d;
+    renderFilmsPane();
+    document.querySelector(`[data-openday="${fid}|${d}"]`)?.focus();
+    return;
+  }
+  const tg = e.target.closest("[data-toggle]");
+  if(tg){
+    const id = tg.dataset.toggle;
+    OPEN.has(id) ? OPEN.delete(id) : OPEN.add(id);
+    renderFilmsPane();
+    document.querySelector(`[data-toggle="${id}"]`)?.focus();
+    return;
+  }
+  const a = e.target.closest("[data-add]");
+  if(a){
+    const sid = a.dataset.add;
+    const s = ALL.find(x => x.id === sid);
+    const i = PICKED_IDS.indexOf(sid);
+    if(i >= 0) PICKED_IDS.splice(i,1);
+    else{
+      PICKED_IDS.push(sid);
+      if(s && !LIKED.has(s.film_id)){ LIKED.add(s.film_id); saveJson(LIKE_KEY, [...LIKED]); }
+    }
+    savePicked(); PROPOSAL = null;
+    renderAll();
+    document.querySelector(`[data-add="${sid}"]`)?.focus();
+  }
+});
+$("mSection").addEventListener("change", renderFilmsPane);
+$("btnClearLiked").onclick = () => {
+  if(!LIKED.size) return;
+  if(!confirm(`確定要清除全部 ${LIKED.size} 個喜歡嗎？片單裡已選的場次不會被移除。`)) return;
+  LIKED.clear();
+  saveJson(LIKE_KEY, []);
+  PROPOSAL = null;
+  $("mLiked").setAttribute("aria-pressed", false);
+  renderAll();
+};
+$("mKind").addEventListener("change", () => { refreshFilmSections(); renderFilmsPane(); });
+$("mText").addEventListener("input", renderFilmsPane);
+["mLiked","mTalk","tTight","tFewDays"].forEach(id => $(id).addEventListener("click", () => {
+  $(id).setAttribute("aria-pressed", !on(id));
+  if(id === "tTight" || id === "tFewDays") PROPOSAL = null;
+  renderFilmsPane();
+}));
+
+/* ============================================================
+   自動排片
+   ============================================================
+   目標：喜歡的片（還沒排進片單的）每部挑一場，
+     1. 排進去的片越多越好
+     2. 同樣多時，用到的天數越少越好（可關掉）
+     3. 再來，偏趕的空檔越少越好
+   片單裡已經選好的場次會保留不動，新場次必須跟它們相容。
+   做法：場次少的片先排的回溯搜尋，搭配「剩下的片全排進去也贏不了就剪枝」，
+   搜尋量有上限，超過就回傳目前找到最好的組合。
+   ============================================================ */
+function fits(a, b, allowTight){
+  if(a.date !== b.date) return true;
+  const [x, y] = a.start <= b.start ? [a, b] : [b, a];
+  const r = relation(x, y);
+  if(!r) return true;
+  return r.level === "ok" || (allowTight && r.level === "warn");
+}
+function tightCount(list){
+  let n = 0;
+  for(let i=0;i<list.length;i++) for(let j=i+1;j<list.length;j++){
+    const a = list[i], b = list[j];
+    if(a.date !== b.date) continue;
+    const r = a.start <= b.start ? relation(a,b) : relation(b,a);
+    if(r?.level === "warn") n++;
+  }
+  return n;
+}
+
+function autoPlan(){
+  const allowTight = on("tTight"), fewDays = on("tFewDays");
+  const fixed = picked();
+  const have = new Set(fixed.map(s => s.film_id));
+  const targets = FILMS.filter(f => LIKED.has(f.id) && !have.has(f.id)).map(f => ({
+    film:f,
+    opts:f.shows.filter(s => AVAIL.has(s.date) && fixed.every(p => fits(p, s, allowTight))),
+  }));
+  const noSlot = targets.filter(t => !t.opts.length).map(t => ({film:t.film,
+    reason: t.film.shows.some(s => AVAIL.has(s.date)) ? "場次都跟片單裡已選的場撞到" : "可以去的日子裡沒有場次"}));
+  const T = targets.filter(t => t.opts.length).sort((a,b) => a.opts.length - b.opts.length);
+
+  const fixedDays = new Set(fixed.map(s => s.date));
+  let best = {n:-1, days:Infinity, tight:Infinity, pick:[]};
+  const cur = [];
+  let nodes = 0;
+  const LIMIT = 300000;
+
+  function score(){
+    const days = new Set([...fixedDays, ...cur.map(s => s.date)]).size;
+    const tight = allowTight ? tightCount([...fixed, ...cur]) : 0;
+    const d = fewDays ? days : 0;
+    if(cur.length > best.n || (cur.length === best.n && (d < best.days || (d === best.days && tight < best.tight))))
+      best = {n:cur.length, days:d, tight, pick:[...cur]};
+  }
+  function dfs(i){
+    if(++nodes > LIMIT) return;
+    if(cur.length + (T.length - i) < best.n) return;       // 剩下全排也贏不了
+    if(i === T.length){ score(); return; }
+    // 集中天數：已經有排的日子優先試
+    const used = new Set([...fixedDays, ...cur.map(s => s.date)]);
+    const opts = fewDays
+      ? [...T[i].opts].sort((a,b) => (used.has(b.date)?1:0) - (used.has(a.date)?1:0))
+      : T[i].opts;
+    for(const s of opts){
+      if(cur.every(c => fits(c, s, allowTight))){
+        cur.push(s); dfs(i+1); cur.pop();
+      }
+    }
+    if(cur.length + (T.length - i - 1) >= best.n) dfs(i+1); // 這部片不排
+  }
+  dfs(0);
+
+  const chosen = new Set(best.pick.map(s => s.film_id));
+  const dropped = T.filter(t => !chosen.has(t.film.id))
+    .map(t => ({film:t.film, reason:"跟其他喜歡的片場次互相衝突，無法同時排進去"}));
+  return {pick:best.pick.sort((a,b) => a.start < b.start ? -1 : 1),
+    miss:[...noSlot, ...dropped], partial: nodes > LIMIT, already:have.size && FILMS.filter(f => LIKED.has(f.id) && have.has(f.id)).length};
+}
+
+function renderAuto(){
+  const days = [...new Set(ALL.map(s => s.date))].sort();
+  $("avail").innerHTML = days.map(d => {
+    const x = ymdParts(d);
+    return `<button class="dchip" data-avail="${d}" aria-pressed="${AVAIL.has(d)}"><b class="num">${x.m}/${x.d}</b><small>${WEEK[x.w]}</small></button>`;
+  }).join("");
+  const inPlan = pickedFilmIds();
+  const want = [...LIKED].filter(id => FILMS.some(f => f.id === id));
+  const todo = want.filter(id => !inPlan.has(id)).length;
+  $("autoHint").textContent = !want.length
+    ? "還沒有喜歡的片，先在下方按 ♥。"
+    : `喜歡 ${want.length} 部，其中 ${want.length - todo} 部已在片單，${todo} 部待排。片單裡已選的場次會保留。`;
+  $("btnPlan").disabled = !todo || !AVAIL.size;
+
+  if(!PROPOSAL){ $("proposal").innerHTML = ""; return; }
+  const P = PROPOSAL;
+  let h = `<div class="proposal">`;
+  if(P.pick.length){
+    const dayN = new Set(P.pick.map(s => s.date)).size;
+    h += `<h3>可以排進 ${P.pick.length} 部（${dayN} 天）</h3><ol>` +
+      P.pick.map(s => `<li><span class="d num">${dayLabel(s.date)} ${hhmm(s.start)}</span>
+        <span class="b">${escHtml(s.title)}<br><small style="color:var(--muted)">${escHtml(s.short)}${s.end?"・到 "+hhmm(s.end):""}</small></span></li>`).join("") +
+      `</ol><div class="actions"><button class="btn" id="btnAccept">加入片單</button>
+        <button class="btn ghost" id="btnDiscard">不要這個</button></div>`;
+  }else{
+    h += `<h3>沒辦法再排進任何一部</h3>`;
+  }
+  if(P.miss.length){
+    h += `<div class="miss"><h3>排不進去的 ${P.miss.length} 部</h3><ol>` +
+      P.miss.map(m => `<li><span class="b">${escHtml(m.film.title)}<br><small>${m.reason}</small></span></li>`).join("") +
+      `</ol></div>`;
+  }
+  if(P.partial) h += `<p class="hint" style="margin-top:8px">片太多，只搜尋了一部分組合，結果可能不是最佳。</p>`;
+  $("proposal").innerHTML = h + `</div>`;
+}
+
+$("avail").addEventListener("click", e => {
+  const b = e.target.closest("[data-avail]");
+  if(!b) return;
+  const d = b.dataset.avail;
+  AVAIL.has(d) ? AVAIL.delete(d) : AVAIL.add(d);
+  saveJson(AVAIL_KEY, [...AVAIL]);
+  PROPOSAL = null;
+  renderFilmsPane();
+});
+$("btnPlan").onclick = () => {
+  $("btnPlan").disabled = true;
+  $("btnPlan").textContent = "排片中…";
+  setTimeout(() => {
+    PROPOSAL = autoPlan();
+    $("btnPlan").textContent = "重新排一次";
+    renderFilmsPane();
+    $("proposal").scrollIntoView({block:"nearest"});
+  }, 20);
+};
+$("proposal").addEventListener("click", e => {
+  if(e.target.id === "btnAccept"){
+    PROPOSAL.pick.forEach(s => { if(!PICKED_IDS.includes(s.id)) PICKED_IDS.push(s.id); });
+    savePicked(); PROPOSAL = null;
+    $("btnPlan").textContent = "幫我排場次";
+    renderAll();
+    showTab("list");
+  }else if(e.target.id === "btnDiscard"){
+    PROPOSAL = null; renderFilmsPane();
+  }
+});
+
+
+/* ============================================================
+   行程表圖片
+   用 Canvas 自己畫，不需要外部套件；太長會自動分成多張。
+   ============================================================ */
+/* 視覺沿用網站：米白底、松綠主色、細框線、左側色條的卡片 */
+const IMG_SIZES = {
+  portrait: {w:1080, h:1350, cols:2},
+  square:   {w:1080, h:1080, cols:2},
+  story:    {w:1080, h:1920, cols:2},
+  landscape:{w:1920, h:1080, cols:3},
+};
+const IC = {paper:"#FBFAF7", ink:"#16161A", muted:"#74736E", line:"#E4E2DC",
+            pine:"#1F4D46", clash:"#B23B32", tight:"#A9641E", card:"#FFFFFF", star:"#8A5A00"};
+const FONT = `-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif`;
+const font = (px, w=400) => `${w} ${px}px ${FONT}`;
+const IP = 56, GAP_X = 32;              // 外邊界、欄距
+const HEAD_H = 200, FOOT_H = 76;        // 標題區、頁尾
+const DAY_H = 62;                       // 每天的標題列
+const TIME_W = 112;                     // 卡片左邊的時間欄
+const ROW_GAP = 12;
+let imgUrls = [], imgBlobs = [], imgJob = 0;
+
+function wrap(ctx, text, maxW, maxLines){
+  const tokens = String(text).match(/[A-Za-z0-9'’.,:!?&()+\-]+\s*|\s+|./gu) || [];
+  const lines = []; let cur = "", used = 0;
+  for(const tk of tokens){
+    if(ctx.measureText(cur + tk).width <= maxW || !cur){ cur += tk; used++; continue; }
+    lines.push(cur.trimEnd()); cur = tk.trimStart();
+    if(lines.length === maxLines) break;
+    used++;
+  }
+  if(lines.length < maxLines && cur) lines.push(cur.trimEnd());
+  if(used < tokens.length){
+    let last = lines[maxLines-1];
+    while(last && ctx.measureText(last + "…").width > maxW) last = last.slice(0, -1);
+    lines[maxLines-1] = last + "…";
+  }
+  return lines;
+}
+function roundRect(ctx, x, y, w, h, r){
+  ctx.beginPath();
+  ctx.moveTo(x+r, y); ctx.arcTo(x+w, y, x+w, y+h, r); ctx.arcTo(x+w, y+h, x, y+h, r);
+  ctx.arcTo(x, y+h, x, y, r); ctx.arcTo(x, y, x+w, y, r); ctx.closePath();
+}
+
+// 每一場整理成要畫的內容，並算好高度
+function buildRows(ctx, items, colW){
+  const cardW = colW - TIME_W;
+  const inner = cardW - 20 - 18;
+  let prev = null;
+  return items.map(s => {
+    const r = prev ? relation(prev, s) : null;
+    const level = r && r.level !== "ok" ? r.level : null;
+    ctx.font = font(28, 600);
+    const title = wrap(ctx, s.title, inner, 2);
+    let meta = [s.short, s.runtime ? `${s.runtime} 分` : (s.code || "")].filter(Boolean).join("・");
+    if(s.kind === "xr" && s.code) meta = `${s.code}・${meta}`;
+    const talk = s.tags.includes("filmmaker_talk");
+    let warn = "";
+    if(level === "bad") warn = `與上一場重疊 ${minText(-r.gap)}`;
+    else if(level === "warn") warn = `空檔只有 ${minText(r.gap)}`;
+    ctx.font = font(21);
+    const metaLine = wrap(ctx, meta, inner - (talk ? 34 : 0), 1)[0] || "";
+    const h = 16 + title.length * 36 + 4 + 28 + (warn ? 28 : 0) + 14;
+    if(!s.freeflow && (!prev || (s.end||s.start) > (prev.end||prev.start))) prev = s;
+    return {s, title, metaLine, talk, warn, level, h};
+  });
+}
+
+// 版面：每天依序由上往下、由左往右填入欄位；放不下就接到下一欄或下一張
+function layout(size, byDay, days, ctx){
+  const colW = (size.w - IP*2 - GAP_X*(size.cols-1)) / size.cols;
+  const top = HEAD_H, bottom = size.h - FOOT_H;
+  const pages = [[]];
+  let col = 0, y = top;
+  const nextCol = () => {
+    col++; y = top;
+    if(col === size.cols){ col = 0; pages.push([]); }
+  };
+  days.forEach(d => {
+    const rows = buildRows(ctx, byDay[d], colW);
+    let i = 0, cont = false;
+    while(i < rows.length){
+      if(y + DAY_H + rows[i].h > bottom){
+        if(y === top) { /* 一場就比整欄高，只好硬放 */ }
+        else { nextCol(); continue; }
+      }
+      const block = {day:d, cont, x: IP + col * (colW + GAP_X), y, w: colW, rows: []};
+      pages[pages.length-1].push(block);
+      y += DAY_H;
+      while(i < rows.length && (y + rows[i].h <= bottom || !block.rows.length)){
+        block.rows.push({...rows[i], y});
+        y += rows[i].h + ROW_GAP;
+        i++;
+      }
+      y += 22;
+      if(i < rows.length){ cont = true; nextCol(); }
+    }
+  });
+  return {pages: pages.filter(p => p.length), colW};
+}
+
+function drawRow(ctx, bx, bw, r){
+  const {s, y, h} = r;
+  const w = s.allDay ? {a:"全天", b:""} : whenText(s);
+  ctx.textBaseline = "top";
+  ctx.fillStyle = IC.ink; ctx.font = font(30, 600);
+  ctx.fillText(w.a, bx, y + 14);
+  ctx.fillStyle = IC.muted; ctx.font = font(19);
+  ctx.fillText(w.b, bx + 1, y + 52);
+
+  const cx = bx + TIME_W, cw = bw - TIME_W;
+  ctx.fillStyle = IC.card; roundRect(ctx, cx, y, cw, h, 10); ctx.fill();
+  ctx.strokeStyle = IC.line; ctx.lineWidth = 2; roundRect(ctx, cx, y, cw, h, 10); ctx.stroke();
+  // 左側色條：正常松綠、重疊磚紅、太趕赭黃（同網站）
+  ctx.save(); roundRect(ctx, cx, y, cw, h, 10); ctx.clip();
+  ctx.fillStyle = r.level === "bad" ? IC.clash : r.level === "warn" ? IC.tight : IC.pine;
+  ctx.fillRect(cx, y, 5, h);
+  ctx.restore();
+
+  let yy = y + 16;
+  const tx = cx + 20;
+  ctx.fillStyle = IC.ink; ctx.font = font(28, 600);
+  r.title.forEach(l => { ctx.fillText(l, tx, yy); yy += 36; });
+  yy += 4;
+  ctx.fillStyle = IC.muted; ctx.font = font(21);
+  ctx.fillText(r.metaLine, tx, yy);
+  if(r.talk){
+    const mw = ctx.measureText(r.metaLine).width;
+    ctx.fillStyle = IC.star; ctx.font = font(21, 600);
+    ctx.fillText(" ★", tx + mw, yy);
+  }
+  yy += 28;
+  if(r.warn){
+    ctx.fillStyle = r.level === "bad" ? IC.clash : IC.tight; ctx.font = font(21, 600);
+    ctx.fillText(r.warn, tx, yy);
+  }
+}
+
+function drawPage(ctx, size, blocks, info, pageNo, pageCount){
+  ctx.fillStyle = IC.paper; ctx.fillRect(0, 0, size.w, size.h);
+  ctx.textBaseline = "top";
+  // 標題（同網站頁首：粗體標題＋灰色副標＋底線）
+  ctx.fillStyle = IC.ink; ctx.font = font(52, 700);
+  ctx.fillText("我的片單", IP, 52);
+  ctx.fillStyle = IC.muted; ctx.font = font(24);
+  ctx.fillText(info.sub, IP, 122);
+  // 右上：圖例
+  const legend = [[IC.pine, "正常"], [IC.tight, "偏趕"], [IC.clash, "重疊"]];
+  let lx = size.w - IP;
+  ctx.font = font(20);
+  [...legend].reverse().forEach(([c, t]) => {
+    const tw = ctx.measureText(t).width;
+    lx -= tw; ctx.fillStyle = IC.muted; ctx.fillText(t, lx, 70);
+    lx -= 14; ctx.fillStyle = c; ctx.fillRect(lx, 68, 5, 26);
+    lx -= 24;
+  });
+  if(pageCount > 1){
+    const p = `${pageNo} / ${pageCount}`;
+    ctx.fillStyle = IC.muted; ctx.font = font(22, 600);
+    ctx.fillText(p, size.w - IP - ctx.measureText(p).width, 124);
+  }
+  ctx.fillStyle = IC.line; ctx.fillRect(IP, 166, size.w - IP*2, 2);
+
+  blocks.forEach(b => {
+    // 每天的標題
+    ctx.fillStyle = IC.ink; ctx.font = font(30, 600);
+    const label = dayLabel(b.day) + (b.cont ? " 續" : "");
+    ctx.fillText(label, b.x, b.y + 8);
+    if(!b.cont){
+      const n = info.byDay[b.day].length;
+      const t = `${n} 場`;
+      ctx.fillStyle = IC.muted; ctx.font = font(21);
+      ctx.fillText(t, b.x + b.w - ctx.measureText(t).width, b.y + 14);
+    }
+    b.rows.forEach(r => drawRow(ctx, b.x, b.w, r));
+  });
+
+  ctx.fillStyle = IC.line; ctx.fillRect(IP, size.h - FOOT_H + 8, size.w - IP*2, 2);
+  ctx.fillStyle = IC.muted; ctx.font = font(20);
+  ctx.fillText("2026 高雄電影節_排片小工具", IP, size.h - FOOT_H + 28);
+  const now = new Date();
+  const r = `${now.getMonth()+1}/${now.getDate()} 產生・場次以官網公告為準`;
+  ctx.fillText(r, size.w - IP - ctx.measureText(r).width, size.h - FOOT_H + 28);
+}
+
+
+/* ---------- 週曆版面 ---------- */
+const WK = {w:1920, h:1080, pad:48, axis:78, top:150, dayHead:66, chipH:34, foot:60};
+const TINT = {ok:"#E8F0EE", bad:"#F7E6E4", warn:"#F6ECDF"};
+
+function addDays(ymd, n){
+  const [y, m, d] = ymd.split("-").map(Number);
+  return new Date(Date.UTC(y, m-1, d + n)).toISOString().slice(0, 10);
+}
+function weekStartOf(ymd){
+  if($("imgWeekStart").value === "mon"){
+    const w = ymdParts(ymd).w;              // 0 = 週日
+    return addDays(ymd, -((w + 6) % 7));
+  }
+  const diff = Math.round((Date.parse(ymd) - Date.parse(FEST_START)) / 864e5);
+  return addDays(FEST_START, Math.floor(diff / 7) * 7);
+}
+function weeksOf(list){
+  const m = new Map();
+  list.forEach(s => {
+    const k = weekStartOf(s.date);
+    if(!m.has(k)) m.set(k, []);
+    m.get(k).push(s);
+  });
+  return [...m.entries()].sort((a, b) => a[0] < b[0] ? -1 : 1);
+}
+const minsOf = iso => +iso.slice(11,13) * 60 + +iso.slice(14,16);
+const endMins = s => s.end ? minsOf(s.end) : minsOf(s.start) + 90;
+// 橫條（全天、自由進出）與時間塊分開
+const isChip = s => s.allDay || s.freeflow;
+
+// 同一天的衝突等級（與片單頁同樣的判斷）
+function levelsOf(items){
+  const lv = new Map(); let prev = null;
+  items.filter(s => !isChip(s)).forEach(s => {
+    const r = prev ? relation(prev, s) : null;
+    lv.set(s.id, r && r.level !== "ok" ? r.level : "ok");
+    if(!prev || endMins(s) > endMins(prev)) prev = s;
+  });
+  return lv;
+}
+// 時間重疊的場次並排：回傳每場的欄位與該群組欄數
+function lanesOf(items){
+  const out = new Map();
+  let group = [], groupEnd = -1, laneEnds = [];
+  const flush = () => { group.forEach(g => out.get(g.id).n = laneEnds.length); group = []; laneEnds = []; };
+  items.forEach(s => {
+    const st = minsOf(s.start), en = Math.max(endMins(s), st + 20);
+    if(st >= groupEnd) { flush(); groupEnd = -1; }
+    let lane = laneEnds.findIndex(e => e <= st);
+    if(lane < 0){ lane = laneEnds.length; laneEnds.push(en); } else laneEnds[lane] = en;
+    out.set(s.id, {lane, n:1});
+    group.push(s); groupEnd = Math.max(groupEnd, en);
+  });
+  flush();
+  return out;
+}
+
+function drawWeek(ctx, days, items, info, pageNo, pageCount){
+  const {w:W, h:H, pad:P, axis:AX} = WK;
+  ctx.fillStyle = IC.paper; ctx.fillRect(0, 0, W, H);
+  ctx.textBaseline = "top";
+
+  // 標題
+  ctx.fillStyle = IC.ink; ctx.font = font(46, 700);
+  ctx.fillText("我的片單", P, 36);
+  ctx.fillStyle = IC.muted; ctx.font = font(22);
+  const sub = `${FESTIVAL}・${dayLabel(days[0])} ～ ${dayLabel(days[6])}・${items.length} 場`;
+  ctx.fillText(sub, P + ctx.measureText("我的片單").width * 46/22 + 28, 58);
+  let lx = W - P;
+  ctx.font = font(20);
+  const legend = [[IC.pine, "正常"], [IC.tight, "偏趕"], [IC.clash, "重疊"]];
+  if(pageCount > 1){
+    const p = `${pageNo} / ${pageCount}`;
+    ctx.fillStyle = IC.muted; ctx.font = font(22, 600);
+    lx -= ctx.measureText(p).width; ctx.fillText(p, lx, 56); lx -= 40;
+    ctx.font = font(20);
+  }
+  [...legend].reverse().forEach(([c, t]) => {
+    const tw = ctx.measureText(t).width;
+    lx -= tw; ctx.fillStyle = IC.muted; ctx.fillText(t, lx, 58);
+    lx -= 14; ctx.fillStyle = c; ctx.fillRect(lx, 56, 5, 26);
+    lx -= 24;
+  });
+  ctx.fillStyle = IC.line; ctx.fillRect(P, 118, W - P*2, 2);
+
+  const byDay = Object.fromEntries(days.map(d => [d, []]));
+  items.forEach(s => byDay[s.date]?.push(s));
+  const colW = (W - P*2 - AX) / 7;
+  const colX = i => P + AX + i * colW;
+
+  // 全天列
+  const chipRows = Math.max(0, ...days.map(d => byDay[d].filter(isChip).length));
+  const shownChips = Math.min(chipRows, 2);
+  const stripTop = WK.top + WK.dayHead;
+  const stripH = shownChips ? shownChips * (WK.chipH + 6) + 10 : 0;
+
+  // 時間範圍
+  const timed = items.filter(s => !isChip(s));
+  let h0 = 10, h1 = 22;
+  if(timed.length){
+    h0 = Math.min(h0, Math.floor(Math.min(...timed.map(s => minsOf(s.start))) / 60));
+    h1 = Math.max(h1, Math.ceil(Math.max(...timed.map(endMins)) / 60));
+  }
+  const gTop = stripTop + stripH + 8, gBot = H - WK.foot;
+  const ppm = (gBot - gTop) / ((h1 - h0) * 60);
+  const yOf = m => gTop + (m - h0 * 60) * ppm;
+
+  // 欄底色、日期
+  days.forEach((d, i) => {
+    const x = colX(i);
+    const off = d < FEST_START || d > (info.festEnd || "9999");
+    if(off){ ctx.fillStyle = "#F2F0EB"; ctx.fillRect(x, WK.top, colW, gBot - WK.top); }
+    const {m, d:dd, w} = ymdParts(d);
+    const cnt = byDay[d].length;
+    ctx.fillStyle = off ? IC.muted : IC.ink; ctx.font = font(30, 700);
+    ctx.fillText(`${m}/${dd}`, x + 12, WK.top + 12);
+    const dw = ctx.measureText(`${m}/${dd}`).width;
+    ctx.fillStyle = w === 0 || w === 6 ? IC.clash : IC.muted; ctx.font = font(22, 600);
+    ctx.fillText(WEEK[w], x + 12 + dw + 8, WK.top + 19);
+    if(cnt){
+      const c = `${cnt} 場`;
+      ctx.fillStyle = IC.muted; ctx.font = font(18);
+      ctx.fillText(c, x + colW - 12 - ctx.measureText(c).width, WK.top + 22);
+    }
+    if(off && !cnt){
+      ctx.fillStyle = IC.muted; ctx.font = font(18);
+      ctx.fillText("非影展期間", x + 12, WK.top + WK.dayHead + 12);
+    }
+  });
+
+  // 格線
+  ctx.fillStyle = IC.line;
+  ctx.fillRect(P, WK.top + WK.dayHead - 2, W - P*2, 2);
+  for(let h = h0; h <= h1; h++){
+    const y = Math.round(yOf(h * 60));
+    ctx.fillStyle = IC.line; ctx.fillRect(P + AX, y, W - P*2 - AX, 1);
+    if(h < h1){
+      ctx.fillStyle = IC.muted; ctx.font = font(18);
+      ctx.fillText(`${String(h).padStart(2,"0")}:00`, P, y - 9);
+    }
+  }
+  for(let i = 0; i <= 7; i++){
+    ctx.fillStyle = IC.line; ctx.fillRect(Math.round(colX(i)), WK.top, 1, gBot - WK.top);
+  }
+
+  days.forEach((d, i) => {
+    const x = colX(i);
+    // 全天、自由進出
+    const chips = byDay[d].filter(isChip);
+    chips.slice(0, shownChips).forEach((s, k) => {
+      const more = k === shownChips - 1 && chips.length > shownChips;
+      const cy = stripTop + 6 + k * (WK.chipH + 6);
+      ctx.fillStyle = TINT.ok; roundRect(ctx, x + 6, cy, colW - 12, WK.chipH, 6); ctx.fill();
+      ctx.fillStyle = IC.pine; ctx.fillRect(x + 6, cy, 4, WK.chipH);
+      ctx.fillStyle = IC.ink; ctx.font = font(17, 600); ctx.textBaseline = "middle";
+      const label = more ? `＋${chips.length - k} 項全天活動` : s.title;
+      ctx.fillText(wrap(ctx, label, colW - 34, 1)[0] || "", x + 18, cy + WK.chipH/2 + 1);
+      ctx.textBaseline = "top";
+    });
+
+    // 時間塊
+    const list = byDay[d].filter(s => !isChip(s));
+    const lv = levelsOf(list), lanes = lanesOf(list);
+    list.forEach(s => {
+      const {lane, n} = lanes.get(s.id);
+      const level = lv.get(s.id);
+      const lw = (colW - 10) / n;
+      const bx = x + 5 + lane * lw, bw = lw - 4;
+      const y0 = yOf(minsOf(s.start)), y1 = yOf(endMins(s));
+      const bh = Math.max(y1 - y0 - 2, 26);
+      const bar = level === "bad" ? IC.clash : level === "warn" ? IC.tight : IC.pine;
+      ctx.fillStyle = TINT[level]; roundRect(ctx, bx, y0, bw, bh, 6); ctx.fill();
+      ctx.save(); roundRect(ctx, bx, y0, bw, bh, 6); ctx.clip();
+      ctx.fillStyle = bar; ctx.fillRect(bx, y0, 4, bh);
+      if(level !== "ok"){ ctx.strokeStyle = bar; ctx.lineWidth = 3; roundRect(ctx, bx, y0, bw, bh, 6); ctx.stroke(); }
+
+      const tx = bx + 10, tw = bw - 16;
+      let ty = y0 + 5;
+      const room = y0 + bh - 4;
+      const time = hhmm(s.start);
+      if(bh < 44){
+        // 太短：時間和片名擠一行
+        ctx.fillStyle = IC.ink; ctx.font = font(15, 700);
+        ctx.fillText(wrap(ctx, `${time} ${s.title}`, tw, 1)[0] || "", tx, ty);
+      }else{
+        ctx.fillStyle = bar; ctx.font = font(15, 700);
+        ctx.fillText(time + (s.end ? `–${hhmm(s.end)}` : ""), tx, ty);
+        ty += 20;
+        ctx.font = font(18, 600);
+        const maxLines = Math.max(1, Math.floor((room - ty) / 22));
+        const lines = wrap(ctx, s.title, tw, Math.min(maxLines, 4));
+        ctx.fillStyle = IC.ink;
+        lines.forEach(l => { ctx.fillText(l, tx, ty); ty += 22; });
+        if(ty + 18 <= room){
+          ctx.fillStyle = IC.muted; ctx.font = font(15);
+          const v = (s.code ? s.code + " " : "") + s.short + (s.tags.includes("filmmaker_talk") ? " ★" : "");
+          ctx.fillText(wrap(ctx, v, tw, 1)[0] || "", tx, ty + 2);
+        }
+      }
+      ctx.restore();
+    });
+  });
+
+  // 頁尾
+  ctx.fillStyle = IC.muted; ctx.font = font(18); ctx.textBaseline = "top";
+  ctx.fillText("2026 高雄電影節_排片小工具", P, H - 40);
+  const now = new Date();
+  const r = `${now.getMonth()+1}/${now.getDate()} 產生・色塊長度依片長估算，XR 含設備配戴・場次以官網公告為準`;
+  ctx.fillText(r, W - P - ctx.measureText(r).width, H - 40);
+}
+
+async function renderWeeks(){
+  const pick = $("imgDay").value;
+  const weeks = weeksOf(picked()).filter(([k]) => !pick || k === pick);
+  if(document.fonts?.ready) await document.fonts.ready;
+  const blobs = [];
+  for(let i = 0; i < weeks.length; i++){
+    const [start, items] = weeks[i];
+    const days = Array.from({length:7}, (_, k) => addDays(start, k));
+    const cv = document.createElement("canvas");
+    cv.width = WK.w; cv.height = WK.h;
+    drawWeek(cv.getContext("2d"), days, items, {festEnd: FEST_END}, i + 1, weeks.length);
+    blobs.push(await new Promise(ok => cv.toBlob(ok, "image/png")));
+  }
+  return blobs;
+}
+
+async function renderImages(){
+  if($("imgLayout").value === "week") return renderWeeks();
+  const size = IMG_SIZES[$("imgSize").value] || IMG_SIZES.portrait;
+  const only = $("imgDay").value;
+  const list = picked().filter(s => !only || s.date === only);
+  const byDay = {};
+  list.forEach(s => (byDay[s.date] ||= []).push(s));
+  const days = Object.keys(byDay).sort();
+  if(document.fonts?.ready) await document.fonts.ready;
+
+  const probe = document.createElement("canvas").getContext("2d");
+  const {pages} = layout(size, byDay, days, probe);
+  const range = days.length > 1 ? `${dayLabel(days[0])} ～ ${dayLabel(days[days.length-1])}` : dayLabel(days[0]);
+  const info = {byDay, sub:`${FESTIVAL}・${range}・${list.length} 場`};
+
+  const blobs = [];
+  for(let i = 0; i < pages.length; i++){
+    const cv = document.createElement("canvas");
+    cv.width = size.w; cv.height = size.h;
+    drawPage(cv.getContext("2d"), size, pages[i], info, i+1, pages.length);
+    blobs.push(await new Promise(ok => cv.toBlob(ok, "image/png")));
+  }
+  return blobs;
+}
+
+async function refreshImages(){
+  const out = $("imgOut");
+  const job = ++imgJob;                      // 連續切換選項時，只採用最後一次的結果
+  out.innerHTML = `<p class="dlgsub">產生中…</p>`;
+  let blobs;
+  try{
+    blobs = await renderImages();
+    if(job !== imgJob) return;
+    imgUrls.forEach(u => URL.revokeObjectURL(u));
+    imgBlobs = blobs;
+  }catch(e){
+    if(job !== imgJob) return;
+    out.innerHTML = `<p class="dlgsub" style="color:var(--clash)">圖片產生失敗：${escHtml(e.message)}</p>`;
+    return;
+  }
+  const only = $("imgDay").value;
+  const wk = $("imgLayout").value === "week";
+  const base = `高雄電影節_${wk ? "週曆" : "行程表"}${only ? "_" + only.slice(5).replace("-","") : ""}`;
+  imgUrls = imgBlobs.map(b => URL.createObjectURL(b));
+  out.classList.toggle("wide", wk);
+  out.innerHTML = imgUrls.map((u, i) => {
+    const name = imgUrls.length > 1 ? `${base}_${i+1}.png` : `${base}.png`;
+    return `<figure><img src="${u}" alt="行程表圖片${imgUrls.length > 1 ? ` 第 ${i+1} 張` : ""}">
+      <figcaption><span>${imgUrls.length > 1 ? `第 ${i+1} / ${imgUrls.length} 張` : "行程表"}</span>
+      <a class="dl" href="${u}" download="${name}">下載圖片</a></figcaption></figure>`;
+  }).join("") + `<p class="dlgsub">手機若無法直接下載，可長按圖片儲存。</p>`;
+  const files = imgBlobs.map((b, i) => new File([b], `${base}_${i+1}.png`, {type:"image/png"}));
+  $("imgShare").hidden = !(navigator.canShare && navigator.canShare({files}));
+  $("imgShare").onclick = () => navigator.share({files, title:"我的影展行程表"}).catch(() => {});
+}
+
+function fillImgRange(){
+  const sel = $("imgDay");
+  const keep = sel.value;
+  const week = $("imgLayout").value === "week";
+  $("wkStartBox").classList.toggle("hide", !week);
+  $("sizeBox").classList.toggle("hide", week);
+  if(week){
+    const ws = weeksOf(picked());
+    sel.innerHTML = `<option value="">全部（${ws.length} 週）</option>` + ws.map(([k, items]) =>
+      `<option value="${k}">${dayLabel(k)} 起的一週（${items.length} 場）</option>`).join("");
+  }else{
+    const days = [...new Set(picked().map(s => s.date))].sort();
+    sel.innerHTML = `<option value="">全部（${days.length} 天）</option>` +
+      days.map(d => `<option value="${d}">${dayLabel(d)}</option>`).join("");
+  }
+  if([...sel.options].some(o => o.value === keep)) sel.value = keep;
+}
+function openImgDialog(){
+  if(!PICKED_IDS.length) return;
+  fillImgRange();
+  $("imgDlg").showModal();
+  refreshImages();
+}
+$("imgLayout").addEventListener("change", () => { fillImgRange(); refreshImages(); });
+$("imgWeekStart").addEventListener("change", () => { fillImgRange(); refreshImages(); });
+$("imgDay").addEventListener("change", refreshImages);
+$("imgSize").addEventListener("change", refreshImages);
+$("imgClose").onclick = () => $("imgDlg").close();
+
+/* ============================================================
+   底部列
+   ============================================================ */
+function countIssues(){
+  let bad = 0, warn = 0;
+  const byDay = {};
+  picked().forEach(s => (byDay[s.date] = byDay[s.date] || []).push(s));
+  Object.values(byDay).forEach(day => {
+    let prev = null;
+    day.forEach(s => {
+      if(prev){
+        const r = relation(prev, s);
+        if(r?.level === "bad") bad++; else if(r?.level === "warn") warn++;
+      }
+      if(!s.freeflow && (!prev || (s.end||s.start) > (prev.end||prev.start))) prev = s;
+    });
+  });
+  return {bad, warn};
+}
+function renderDock(){
+  const n = PICKED_IDS.length;
+  const {bad, warn} = countIssues();
+  let txt = n ? `已選 ${n} 場` : "片單是空的";
+  if(LIKED.size) txt = `♥ ${LIKED.size} 部・` + txt;
+  if(bad) txt += `　⚠ ${bad} 組重疊`;
+  else if(warn) txt += `　${warn} 組偏趕`;
+  $("dockText").textContent = txt;
+  $("btnIcs").disabled = !n;
+  $("btnClear").disabled = !n;
+}
+function renderAll(){
+  renderDays(); renderResults(); renderDock();
+  if(!$("paneList").classList.contains("hide")) renderPlan();
+  if(!$("paneFilms").classList.contains("hide")) renderFilmsPane();
+}
+
+/* ============================================================
+   事件
+   ============================================================ */
+function showTab(which){
+  const map = {films:["tabFilms","paneFilms"], find:["tabFind","paneFind"], list:["tabList","paneList"]};
+  Object.entries(map).forEach(([k,[tab,pane]]) => {
+    $(tab).setAttribute("aria-selected", k === which);
+    $(pane).classList.toggle("hide", k !== which);
+  });
+  if(which === "find") renderResults();
+  else if(which === "list") renderPlan();
+  else renderFilmsPane();
+  window.scrollTo({top:0});
+}
+$("tabFilms").onclick = () => showTab("films");
+$("tabFind").onclick = () => showTab("find");
+$("tabList").onclick = () => showTab("list");
+$("btnIcs").onclick = downloadIcs;
+$("btnClear").onclick = () => {
+  if(!confirm("確定要清空片單嗎？")) return;
+  PICKED_IDS = []; savePicked(); renderAll();
+};
+$("days").addEventListener("click", e => {
+  const b = e.target.closest(".dchip");
+  if(!b) return;
+  DAY = b.dataset.d; renderDays(); refreshSelects(); renderResults();
+});
+["fVenue","fMovie","fSection"].forEach(id => $(id).addEventListener("change", renderResults));
+$("fType").addEventListener("change", () => { refreshSelects(); renderResults(); });
+$("fText").addEventListener("input", renderResults);
+["tTalk","tFit","tAge","tLiked"].forEach(id => $(id).addEventListener("click", () => {
+  $(id).setAttribute("aria-pressed", !on(id)); renderResults();
+}));
+
+/* ============================================================
+   啟動：優先讀同資料夾的 JSON（方便更新），讀不到就用內嵌資料
+   ============================================================ */
+function start(data){
+  ALL = normalize(data);
+  BYID = new Map(ALL.map(s => [s.id, s]));
+  PICKED_IDS = PICKED_IDS.filter(id => BYID.has(id));
+  const days = [...new Set(ALL.map(s => s.date))].sort();
+  const cnt = k => ALL.filter(s => s.kind === k).length;
+  const fd = data.dates || [days[0], days[days.length-1]];
+  $("dataInfo").textContent =
+    `${dayLabel(fd[0])} ～ ${dayLabel(fd[1])}・長短片 ${cnt("film")} 場・XR ${(data.xr_programs||[]).length} 部・活動 ${(data.events||[]).length} 項`;
+  const today = new Date(Date.now() + 8*3600e3).toISOString().slice(0,10);
+  DAY = days.includes(today) ? today : (fd[0] || days[0]);
+  refreshSelects();
+  buildFilms();
+  const saved = loadJson(AVAIL_KEY, null);
+  AVAIL = new Set((saved || days.filter(d => d >= FEST_START)).filter(d => days.includes(d)));
+  renderAll();
+}
+function embedded(){ return JSON.parse($("embedded").textContent); }
+
+fetch(DATA_URL, {cache:"no-cache"})
+  .then(r => { if(!r.ok) throw 0; return r.json(); })
+  .then(start)
+  .catch(() => {
+    try{ start(embedded()); }
+    catch(err){
+      $("dataInfo").textContent = "資料載入失敗";
+      $("results").innerHTML = `<p class="empty"><strong>讀不到場次資料</strong>
+        請確認 ${DATA_URL} 和這個檔案放在同一個資料夾</p>`;
+    }
+  });
+</script>
+</body>
+</html>
