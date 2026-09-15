@@ -18,6 +18,7 @@ for s in d["screenings"]:
             s["note"] = "；".join(x for x in [base, extra] if x)
 
 for f in d["films"]:
+    if f["title_zh"] in FILM_LINKS: f["url"] = FILM_LINKS[f["title_zh"]]
     if f["title_zh"] == "AI 無界限":
         f["section"] = "主題講堂：AI 無界限"; f.pop("section_inferred", None)
 
@@ -43,6 +44,9 @@ for x in XR + EVENTS:
     if x["venue_id"] not in vids: err.append(f"未知場館 {x['venue_id']} ({x['id']})")
 ids = [x["id"] for x in XR + EVENTS + d["films"]]
 if len(ids) != len(set(ids)): err.append("id 重複")
+titles = {f["title_zh"] for f in d["films"]}
+for t in FILM_LINKS:                  # 片名改了會讓連結失效，提早發現
+    if t not in titles: err.append(f"FILM_LINKS 找不到片名：{t}")
 m = lambda t: int(t[:2])*60 + int(t[3:])
 for p in XR:                      # 同一作品相鄰兩場不能比片長還近
     sch = p["schedule"]
