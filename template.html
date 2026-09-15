@@ -158,6 +158,11 @@ dialog::backdrop{background:rgba(22,22,26,.45)}
 .film[data-liked="1"]{border-color:var(--heart);background:#FBF3F2}
 .film .body{flex:1;min-width:0}
 .film .title{display:block;font-weight:600;word-break:break-word}
+.film a.title{color:inherit;text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px}
+.film a.title:hover{color:var(--pine);text-decoration-color:currentColor}
+.film a.title:focus-visible{outline:2px solid var(--pine);outline-offset:2px;border-radius:2px}
+.film .ext{font-size:.75em;margin-left:3px;color:var(--muted)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .film .en{display:block;font-size:12px;color:var(--muted);word-break:break-word}
 .film .meta{display:block;font-size:12.5px;color:var(--muted);margin-top:2px}
 .film .state{font-size:12px;margin-top:4px;color:var(--pine)}
@@ -483,7 +488,7 @@ function normalize(data){
     const p = place(s.venue_id);
     rows.push({
       kind:"film", id:s.id, date:s.date, start:iso(s.date, s.start), end:s.end ? iso(s.date, s.end) : null,
-      title:f.title_zh||"", en:f.title_en||"", film_id:s.film_id,
+      title:f.title_zh||"", en:f.title_en||"", film_id:s.film_id, url:f.url||"",
       runtime:f.runtime_min, rating:f.rating,
       section:f.section||"其他", sectionInferred:!!f.section_inferred,
       venue_id:s.venue_id, venue:(venues[s.venue_id]||{}).name||s.venue_id,
@@ -872,7 +877,7 @@ $("plan").addEventListener("click", e => {
 function buildFilms(){
   const by = {};
   ALL.forEach(s => {
-    const f = by[s.film_id] ||= {id:s.film_id, kind:s.kind, code:s.code, title:s.title, en:s.en,
+    const f = by[s.film_id] ||= {id:s.film_id, kind:s.kind, code:s.code, title:s.title, en:s.en, url:s.url,
       runtime:s.runtime, rating:s.rating, section:s.section, seats:s.seats, short:s.short,
       fee:s.fee, note:s.kind === "event" ? s.note : "", shows:[]};
     f.shows.push(s);
@@ -907,6 +912,7 @@ function filmMeta(f, days, talk){
   if(talk) bits.push("★ 有影人出席");
   return bits.map(escHtml).join("・");
 }
+const safeUrl = u => /^https:\/\//.test(u || "");
 function filmCard(f, inPlan){
   const liked = LIKED.has(f.id);
   const allDays = [...new Set(f.shows.map(s => s.date))];
@@ -924,7 +930,9 @@ function filmCard(f, inPlan){
   return `
   <div class="film" data-liked="${liked?1:0}">
     <div class="body">
-      <span class="title">${escHtml(f.title)}</span>
+      ${safeUrl(f.url)
+        ? `<a class="title" href="${escHtml(f.url)}" target="_blank" rel="noopener">${escHtml(f.title)}<span class="ext" aria-hidden="true">↗</span><span class="sr">（官網介紹，另開新視窗）</span></a>`
+        : `<span class="title">${escHtml(f.title)}</span>`}
       ${f.en ? `<span class="en">${escHtml(f.en)}</span>` : ""}
       <span class="meta">${filmMeta(f, days, talk)}</span>
       ${f.note ? `<span class="meta">${escHtml(f.note)}</span>` : ""}
