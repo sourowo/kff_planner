@@ -5,7 +5,8 @@ import json, sys
 from collections import defaultdict
 from extra_data import *
 
-OUT = "../"   # 輸出到上一層（網站根目錄）；在 build 資料夾裡執行
+OUT = "./"  # 輸出到同一層（repo 根目錄）；在 repo 根目錄執行
+
 d = json.load(open(OUT + "kff2026_screenings.json"))
 
 # 移除取消的場次；若影片因此沒有任何場次，一併移除
@@ -14,9 +15,12 @@ gone = [s for s in d["screenings"] if (s["date"], s["venue_id"], s["start"]) in 
 d["screenings"] = [s for s in d["screenings"] if s not in gone]
 still = set().union(*map(refs, d["screenings"]))
 gone_refs = set().union(*map(refs, gone)) if gone else set()
-d["films"] = [f for f in d["films"] if not (f["id"] in gone_refs and f["id"] not in still)]
+removed_films = [f["title_zh"] for f in d["films"] if f["id"] in gone_refs and f["id"] not in still]
+d["films"] = [f for f in d["films"] if f["title_zh"] not in removed_films]
 if gone:
     print(f"已移除取消場次 {len(gone)} 場")
+if removed_films:
+    print("已移除沒有場次的影片：" + "、".join(removed_films))
 
 # 活動場補說明（保留原本的 note）
 for s in d["screenings"]:
@@ -43,7 +47,7 @@ d["ticket_prices"].update({
     "xr_special":{"early":699,"regular":799},
     "free":{"early":0,"regular":0},
 })
-d["xr_setup_min"] = 10          # XR 觀影前說明與設備配戴，手冊說 5–15 分鐘
+d["xr_setup_min"] = 10  # XR 觀影前說明與設備配戴，手冊說 5–15 分鐘
 d["xr_programs"] = XR
 d["events"] = EVENTS
 
@@ -55,10 +59,10 @@ for x in XR + EVENTS:
 ids = [x["id"] for x in XR + EVENTS + d["films"]]
 if len(ids) != len(set(ids)): err.append("id 重複")
 titles = {f["title_zh"] for f in d["films"]}
-for t in FILM_LINKS:                  # 片名改了會讓連結失效，提早發現
-    if t not in titles: err.append(f"FILM_LINKS 找不到片名：{t}")
+for t in FILM_LINKS:  # 片名改了會讓連結失效，提早發現（已取消的影片略過）
+    if t not in titles and t not in removed_films: err.append(f"FILM_LINKS 找不到片名：{t}")
 m = lambda t: int(t[:2])*60 + int(t[3:])
-for p in XR:                      # 同一作品相鄰兩場不能比片長還近
+for p in XR:  # 同一作品相鄰兩場不能比片長還近
     sch = p["schedule"]
     lists = [sch["times"]] if sch["type"] == "daily" else sch["times"].values()
     for ts in lists:
@@ -73,6 +77,7 @@ json.dump(d, open(OUT + "kff2026_screenings.json", "w"), ensure_ascii=False, ind
 tpl = open("template.html").read()
 open(OUT + "index.html", "w").write(
     tpl.replace("__DATA__", json.dumps(d, ensure_ascii=False).replace("</", "<\\/")))
+
 n_xr = sum(len(p["schedule"]["times"]) * 18 if p["schedule"]["type"] == "daily"
            else sum(map(len, p["schedule"]["times"].values())) for p in XR)
 print(f"長短片 {len(d['screenings'])} 場、XR {len(XR)} 部 {n_xr} 個時段、活動 {len(EVENTS)} 項")
