@@ -2294,18 +2294,6 @@
       "ticket": "short"
     },
     {
-      "id": "s0118",
-      "film_id": "f078",
-      "venue_id": "kfa",
-      "date": "2026-10-18",
-      "start": "16:10",
-      "end": "17:48",
-      "tags": [
-        "filmmaker_talk"
-      ],
-      "ticket": "feature"
-    },
-    {
       "id": "s0119",
       "film_id": "f079",
       "venue_id": "kfa",
