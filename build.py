@@ -8,13 +8,15 @@ from extra_data import *
 OUT = "../"   # 輸出到上一層（網站根目錄）；在 build 資料夾裡執行
 d = json.load(open(OUT + "kff2026_screenings.json"))
 
-# 移除取消的場次
-before = len(d["screenings"])
-d["screenings"] = [s for s in d["screenings"]
-                   if (s["date"], s["venue_id"], s["start"]) not in CANCELLED]
-removed = before - len(d["screenings"])
-if removed:
-    print(f"已移除取消場次 {removed} 場")
+# 移除取消的場次；若影片因此沒有任何場次，一併移除
+refs = lambda s: {v for v in s.values() if isinstance(v, str)}
+gone = [s for s in d["screenings"] if (s["date"], s["venue_id"], s["start"]) in CANCELLED]
+d["screenings"] = [s for s in d["screenings"] if s not in gone]
+still = set().union(*map(refs, d["screenings"]))
+gone_refs = set().union(*map(refs, gone)) if gone else set()
+d["films"] = [f for f in d["films"] if not (f["id"] in gone_refs and f["id"] not in still)]
+if gone:
+    print(f"已移除取消場次 {len(gone)} 場")
 
 # 活動場補說明（保留原本的 note）
 for s in d["screenings"]:
