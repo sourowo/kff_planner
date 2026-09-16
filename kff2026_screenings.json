@@ -401,7 +401,7 @@
       "title_zh": "完美配對謀殺案：真愛",
       "title_en": "Matched: TRUE LOVE",
       "runtime_min": 106,
-      "rating": "12+",
+      "rating": "18+",
       "section": "變形日本",
       "url": "https://www.kff.tw/film/content/5095"
     },
@@ -657,7 +657,7 @@
       "id": "f058",
       "title_zh": "奔跑的孩子",
       "title_en": "The Runner",
-      "runtime_min": 94,
+      "runtime_min": 91,
       "rating": "0+",
       "section": "特別放映",
       "url": "https://www.kff.tw/film/content/5103"
@@ -676,7 +676,7 @@
       "id": "f060",
       "title_zh": "黃塵樹語＋混沌之子＋電幻天鵝",
       "title_en": "Yellow Fieber, Limbo, Electric Swan",
-      "runtime_min": 95,
+      "runtime_min": 88,
       "rating": "6+",
       "section": "焦點影人：康斯坦蒂娜．柯薩瑪尼",
       "url": "https://www.kff.tw/film/list/2026-director-in-focus-kotzamani"
@@ -724,7 +724,7 @@
       "id": "f065",
       "title_zh": "微醺大飯店 1980s：第 1-2 集",
       "title_en": "The Great Tipsy 1980s: Ep. 1-2",
-      "runtime_min": 95,
+      "runtime_min": 88,
       "rating": "6+",
       "section": "高雄劇特別放映",
       "url": "https://www.kff.tw/film/content/5128"
@@ -1202,7 +1202,7 @@
       "date": "2026-10-10",
       "start": "19:00",
       "end": "20:45",
-      "tags": [],
+      "tags": ["filmmaker_talk"],
       "ticket": "feature"
     },
     {
@@ -1505,7 +1505,7 @@
       "date": "2026-10-11",
       "start": "15:30",
       "end": "16:22",
-      "tags": [],
+      "tags": ["no_english_subtitles"],
       "ticket": "feature"
     },
     {
@@ -1557,7 +1557,7 @@
       "date": "2026-10-12",
       "start": "19:30",
       "end": "21:04",
-      "tags": [],
+      "tags": ["filmmaker_talk"],
       "ticket": "short"
     },
     {
@@ -1578,7 +1578,7 @@
       "start": "14:30",
       "end": "16:46",
       "tags": [
-        "no_english_subtitles"
+        ""
       ],
       "ticket": "feature"
     },
@@ -1780,7 +1780,7 @@
       "start": "16:50",
       "end": "19:06",
       "tags": [
-        "no_english_subtitles"
+        ""
       ],
       "ticket": "feature"
     },
@@ -1830,7 +1830,7 @@
       "venue_id": "kfa",
       "date": "2026-10-15",
       "start": "19:10",
-      "end": "20:44",
+      "end": "20:41",
       "tags": [
         "filmmaker_talk"
       ],
@@ -1872,7 +1872,7 @@
       "venue_id": "n1",
       "date": "2026-10-16",
       "start": "19:20",
-      "end": "20:55",
+      "end": "20:48",
       "tags": [
         "filmmaker_talk"
       ],
@@ -1966,10 +1966,9 @@
       "venue_id": "lib",
       "date": "2026-10-17",
       "start": "14:00",
-      "end": "15:35",
+      "end": "15:28",
       "tags": [
         "filmmaker_talk",
-        "no_english_subtitles"
       ],
       "ticket": "feature"
     },
@@ -2015,7 +2014,7 @@
       "venue_id": "n1",
       "date": "2026-10-17",
       "start": "12:40",
-      "end": "13:59",
+      "end": "14:04",
       "tags": [
         "filmmaker_talk"
       ],
@@ -2443,7 +2442,7 @@
       "venue_id": "kfa",
       "date": "2026-10-20",
       "start": "14:00",
-      "end": "15:34",
+      "end": "15:31",
       "tags": [],
       "ticket": "feature"
     },
@@ -2533,7 +2532,7 @@
       "venue_id": "n2",
       "date": "2026-10-21",
       "start": "19:20",
-      "end": "20:39",
+      "end": "20:44",
       "tags": [],
       "ticket": "feature"
     },
@@ -2553,7 +2552,7 @@
       "venue_id": "kfa",
       "date": "2026-10-21",
       "start": "16:30",
-      "end": "18:05",
+      "end": "17:58",
       "tags": [],
       "ticket": "feature"
     },
@@ -2984,7 +2983,7 @@
       "start": "13:00",
       "end": "13:52",
       "tags": [
-        "audience_activity"
+        "no_english_subtitles"
       ],
       "ticket": "feature",
       "note": "法式腹語術（小強老師）"
@@ -3213,7 +3212,7 @@
       "start": "13:00",
       "end": "15:16",
       "tags": [
-        "no_english_subtitles"
+        ""
       ],
       "ticket": "feature"
     },
@@ -3233,7 +3232,7 @@
       "venue_id": "n2",
       "date": "2026-10-26",
       "start": "19:40",
-      "end": "20:59",
+      "end": "21:04",
       "tags": [],
       "ticket": "feature"
     },
