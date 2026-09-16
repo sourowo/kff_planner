@@ -231,12 +231,12 @@ dialog::backdrop{background:rgba(22,22,26,.45)}
   </header>
 
   <div class="tabs" role="tablist">
-    <button class="tab" id="tabFilms" role="tab" aria-selected="false">選電影</button>
-    <button class="tab" id="tabFind" role="tab" aria-selected="true">找場次</button>
+    <button class="tab" id="tabFilms" role="tab" aria-selected="true">選電影</button>
+    <button class="tab" id="tabFind" role="tab" aria-selected="false">找場次</button>
     <button class="tab" id="tabList" role="tab" aria-selected="false">我的片單</button>
   </div>
 
-  <section id="paneFilms" class="hide">
+  <section id="paneFilms">
     <p class="intro">先把想看的片、XR 作品或活動按 ♥，或點「場次」直接加入，也可以用下面的自動排片，一次挑好不會撞的場次。</p>
 
     <div class="auto" id="auto">
@@ -270,7 +270,7 @@ dialog::backdrop{background:rgba(22,22,26,.45)}
     <div id="films"></div>
   </section>
 
-  <section id="paneFind">
+  <section id="paneFind" class="hide">
     <div class="days" id="days" aria-label="日期"></div>
     <div class="filters">
       <div><label for="fVenue">場館</label><select id="fVenue"></select></div>
@@ -809,7 +809,7 @@ function renderPlan(){
   const list = picked();
   if(!list.length){
     $("plan").innerHTML = `<p class="empty"><strong>還沒有選任何場次</strong>
-      到「找場次」點選想看的片，這裡會幫你檢查時間會不會撞到</p>`;
+      到「選電影」按 ♥ 或加入場次，也可以到「找場次」依日期挑選，這裡會幫你檢查時間會不會撞到</p>`;
     return;
   }
   // 同一部片選了兩次
