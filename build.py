@@ -5,7 +5,7 @@ import json, sys
 from collections import defaultdict
 from extra_data import *
 
-OUT = "./"  # 輸出到同一層（repo 根目錄）；在 repo 根目錄執行
+OUT = ""   # 直接在根目錄執行
 
 d = json.load(open(OUT + "kff2026_screenings.json"))
 
