@@ -149,7 +149,9 @@
       "runtime_min": 87,
       "rating": "12+",
       "section": "開幕片",
-      "url": "https://www.kff.tw/film/list/2026opening"
+      "url": "https://www.kff.tw/film/list/2026opening",
+      "distribution": "2027年3月上映",
+      "distribution_short": "2027/3 上映"
     },
     {
       "id": "f003",
@@ -258,7 +260,9 @@
       "runtime_min": 82,
       "rating": "6+",
       "section": "特別放映",
-      "url": "https://www.kff.tw/film/content/5113"
+      "url": "https://www.kff.tw/film/content/5113",
+      "distribution": "2027年上映",
+      "distribution_short": "2027 上映"
     },
     {
       "id": "f015",
@@ -294,7 +298,9 @@
       "runtime_min": 102,
       "rating": "0+",
       "section": "耽美主義",
-      "url": "https://www.kff.tw/film/content/5100"
+      "url": "https://www.kff.tw/film/content/5100",
+      "distribution": "檔期未定",
+      "distribution_short": "檔期未定"
     },
     {
       "id": "f019",
@@ -312,7 +318,9 @@
       "runtime_min": 131,
       "rating": "12+",
       "section": "年度主題：抓馬人間",
-      "url": "https://www.kff.tw/film/content/4924"
+      "url": "https://www.kff.tw/film/content/4924",
+      "distribution": "檔期未定",
+      "distribution_short": "檔期未定"
     },
     {
       "id": "f021",
@@ -394,7 +402,9 @@
       "runtime_min": 90,
       "rating": "0+",
       "section": "臺灣越界",
-      "url": "https://www.kff.tw/film/content/5135"
+      "url": "https://www.kff.tw/film/content/5135",
+      "distribution": "2026年11月20日上映",
+      "distribution_short": "11/20 上映"
     },
     {
       "id": "f030",
@@ -403,7 +413,9 @@
       "runtime_min": 106,
       "rating": "18+",
       "section": "變形日本",
-      "url": "https://www.kff.tw/film/content/5095"
+      "url": "https://www.kff.tw/film/content/5095",
+      "distribution": "2026年10月30日上映",
+      "distribution_short": "10/30 上映"
     },
     {
       "id": "f031",
@@ -412,7 +424,9 @@
       "runtime_min": 89,
       "rating": "6+",
       "section": "臺灣越界",
-      "url": "https://www.kff.tw/film/content/5134"
+      "url": "https://www.kff.tw/film/content/5134",
+      "distribution": "2027年8月1日電視台首播",
+      "distribution_short": "2027/8/1 電視首播"
     },
     {
       "id": "f032",
@@ -439,7 +453,9 @@
       "runtime_min": 102,
       "rating": "6+",
       "section": "特別活動放映",
-      "url": "https://www.kff.tw/film/content/5133"
+      "url": "https://www.kff.tw/film/content/5133",
+      "distribution": "檔期未定",
+      "distribution_short": "檔期未定"
     },
     {
       "id": "f035",
@@ -448,7 +464,9 @@
       "runtime_min": 179,
       "rating": "15+",
       "section": "年度主題：抓馬人間",
-      "url": "https://www.kff.tw/film/content/4923"
+      "url": "https://www.kff.tw/film/content/4923",
+      "distribution": "2026年10月30日上映",
+      "distribution_short": "10/30 上映"
     },
     {
       "id": "f036",
@@ -531,7 +549,9 @@
       "runtime_min": 105,
       "rating": "6+",
       "section": "變形日本",
-      "url": "https://www.kff.tw/film/content/5093"
+      "url": "https://www.kff.tw/film/content/5093",
+      "distribution": "檔期未定",
+      "distribution_short": "檔期未定"
     },
     {
       "id": "f045",
@@ -727,7 +747,9 @@
       "runtime_min": 88,
       "rating": "6+",
       "section": "高雄劇特別放映",
-      "url": "https://www.kff.tw/film/content/5128"
+      "url": "https://www.kff.tw/film/content/5128",
+      "distribution": "2026年12月串流平臺上線",
+      "distribution_short": "12月 串流上線"
     },
     {
       "id": "f066",
@@ -736,7 +758,9 @@
       "runtime_min": 99,
       "rating": "12+",
       "section": "高雄劇特別放映",
-      "url": "https://www.kff.tw/film/content/5129"
+      "url": "https://www.kff.tw/film/content/5129",
+      "distribution": "檔期未定",
+      "distribution_short": "檔期未定"
     },
     {
       "id": "f067",
@@ -745,7 +769,9 @@
       "runtime_min": 155,
       "rating": "15+",
       "section": "抓馬跨世代：阿莫多瓦 vs 哈維爾雙人組",
-      "url": "https://www.kff.tw/film/content/4937"
+      "url": "https://www.kff.tw/film/content/4937",
+      "distribution": "2026年11月20日上映",
+      "distribution_short": "11/20 上映"
     },
     {
       "id": "f068",
@@ -763,7 +789,9 @@
       "runtime_min": 131,
       "rating": "6+",
       "section": "焦點影人：康斯坦蒂娜．柯薩瑪尼",
-      "url": "https://www.kff.tw/film/content/4982"
+      "url": "https://www.kff.tw/film/content/4982",
+      "distribution": "檔期未定",
+      "distribution_short": "檔期未定"
     },
     {
       "id": "f070",
@@ -853,7 +881,9 @@
       "runtime_min": 98,
       "rating": "12+",
       "section": "變形日本",
-      "url": "https://www.kff.tw/film/content/5092"
+      "url": "https://www.kff.tw/film/content/5092",
+      "distribution": "2026年11月13日上映",
+      "distribution_short": "11/13 上映"
     },
     {
       "id": "f080",
@@ -925,7 +955,9 @@
       "runtime_min": 115,
       "rating": "12+",
       "section": "年度主題：抓馬人間",
-      "url": "https://www.kff.tw/film/content/4917"
+      "url": "https://www.kff.tw/film/content/4917",
+      "distribution": "檔期未定",
+      "distribution_short": "檔期未定"
     },
     {
       "id": "f088",
@@ -952,7 +984,9 @@
       "runtime_min": 87,
       "rating": "6+",
       "section": "高雄劇特別放映",
-      "url": "https://www.kff.tw/film/content/5131"
+      "url": "https://www.kff.tw/film/content/5131",
+      "distribution": "檔期未定",
+      "distribution_short": "檔期未定"
     },
     {
       "id": "f091",
@@ -961,7 +995,9 @@
       "runtime_min": 106,
       "rating": "15+",
       "section": "臺灣越界",
-      "url": "https://www.kff.tw/film/content/5137"
+      "url": "https://www.kff.tw/film/content/5137",
+      "distribution": "2026年10月29日上映",
+      "distribution_short": "10/29 上映"
     },
     {
       "id": "f092",
@@ -970,7 +1006,9 @@
       "runtime_min": 77,
       "rating": "6+",
       "section": "臺灣越界",
-      "url": "https://www.kff.tw/film/content/5136"
+      "url": "https://www.kff.tw/film/content/5136",
+      "distribution": "檔期未定",
+      "distribution_short": "檔期未定"
     },
     {
       "id": "f093",
@@ -989,7 +1027,9 @@
       "runtime_min": 89,
       "rating": "6+",
       "section": "萬聖節抓馬派對",
-      "url": "https://www.kff.tw/film/content/5130"
+      "url": "https://www.kff.tw/film/content/5130",
+      "distribution": "2026年12月串流平臺上線",
+      "distribution_short": "12月 串流上線"
     },
     {
       "id": "f095",
@@ -998,7 +1038,9 @@
       "runtime_min": 58,
       "rating": "6+",
       "section": "萬聖節抓馬派對",
-      "url": "https://www.kff.tw/film/content/5099"
+      "url": "https://www.kff.tw/film/content/5099",
+      "distribution": "2026第四季串流平臺上線",
+      "distribution_short": "2026 第四季 串流上線"
     },
     {
       "id": "f096",
@@ -1007,7 +1049,9 @@
       "runtime_min": 100,
       "rating": "0+",
       "section": "閉幕片",
-      "url": "https://www.kff.tw/film/list/2026closing-film"
+      "url": "https://www.kff.tw/film/list/2026closing-film",
+      "distribution": "2026年上映",
+      "distribution_short": "2026 上映"
     },
     {
       "id": "f097",
@@ -1016,7 +1060,9 @@
       "runtime_min": 224,
       "rating": "12+",
       "section": "年度主題：抓馬人間",
-      "url": "https://www.kff.tw/film/content/4922"
+      "url": "https://www.kff.tw/film/content/4922",
+      "distribution": "2026年11月20日上映",
+      "distribution_short": "11/20 上映"
     }
   ],
   "screenings": [
@@ -1030,7 +1076,8 @@
       "tags": [
         "filmmaker_talk"
       ],
-      "ticket": "feature"
+      "ticket": "feature",
+      "guests": "小林聖太郎／導演；安田章大／演員"
     },
     {
       "id": "s0002",
@@ -1042,7 +1089,8 @@
       "tags": [
         "filmmaker_talk"
       ],
-      "ticket": "feature"
+      "ticket": "feature",
+      "guests": "SABU／導演、黃江豐／監製、王思靜／製片；霧島麗香、李沐、黃冠智、喬瑟夫／演員"
     },
     {
       "id": "s0003",
@@ -1074,7 +1122,8 @@
       "tags": [
         "filmmaker_talk"
       ],
-      "ticket": "feature"
+      "ticket": "feature",
+      "guests": "《阿特烈》孫介珩／導演、Jeremy Mayores／演員；《深邃美麗的亞細亞：老和尚與貓怪》陳奕仁／導演、余香凝／演員；《一九四五》張永昌／導演、楊大正、阿部瑪利亞、周厚安／演員"
     },
     {
       "id": "s0006",
@@ -1086,7 +1135,8 @@
       "tags": [
         "filmmaker_talk"
       ],
-      "ticket": "feature"
+      "ticket": "feature",
+      "guests": "《娃娃娃》謝沛如／導演、何曼希、李雪／演員；《卡童》高逸軍／導演、鳳小岳、林辰唏／演員；《寂寞愛德華》施宥全／導演、初孟軒、袁漠遙／演員；《蛋堡 MV》王宗欣、曾忠嶽／導演、蛋堡／演員"
     },
     {
       "id": "s0007",
@@ -1181,7 +1231,8 @@
       "tags": [
         "filmmaker_talk"
       ],
-      "ticket": "feature"
+      "ticket": "feature",
+      "guests": "鄭智泳／導演、廉惠蘭／演員；申敏／配樂家、鄭相敏／監製"
     },
     {
       "id": "s0016",
@@ -1193,7 +1244,8 @@
       "tags": [
         "filmmaker_talk"
       ],
-      "ticket": "feature"
+      "ticket": "feature",
+      "guests": "《球來不打》彭之軒／導演、高英軒、洪君昊、陳邁諾、洪金輝／演員；《那天，我把鯨魚送回大海》張婉兒／導演、林瑜恩、謝以諾／演員；《FUN》張猷嵩／導演、白潤音、郭大睿、謝以樂／演員；《透天》唐豪／導演、蔡明修、吳采芯／演員；《巨大蜥蜴》温紹涵／導演、黃大旺、王興洪／演員"
     },
     {
       "id": "s0017",
@@ -1205,7 +1257,8 @@
       "tags": [
         "filmmaker_talk"
       ],
-      "ticket": "feature"
+      "ticket": "feature",
+      "guests": "全辰隆／導演"
     },
     {
       "id": "s0018",
@@ -1227,7 +1280,8 @@
       "tags": [
         "filmmaker_talk"
       ],
-      "ticket": "feature"
+      "ticket": "feature",
+      "guests": "馬克斯．哈格沃德／導演"
     },
     {
       "id": "s0020",
@@ -1239,7 +1293,8 @@
       "tags": [
         "filmmaker_talk"
       ],
-      "ticket": "feature"
+      "ticket": "feature",
+      "guests": "小林聖太郎／導演"
     },
     {
       "id": "s0021",
@@ -1251,7 +1306,8 @@
       "tags": [
         "filmmaker_talk"
       ],
-      "ticket": "feature"
+      "ticket": "feature",
+      "guests": "潘嘉日靈／導演"
     },
     {
       "id": "s0022",
@@ -1304,7 +1360,8 @@
         "filmmaker_talk"
       ],
       "note": "12:00–21:00 自由進出，免費入場",
-      "ticket": "free"
+      "ticket": "free",
+      "guests": "曾威量、劉純佑、陳瑭羚、邱予慧／影像團隊"
     },
     {
       "id": "s0027",
@@ -1314,10 +1371,12 @@
       "start": "13:20",
       "end": "14:07",
       "tags": [
-        "audience_activity"
+        "audience_activity",
+        "filmmaker_talk"
       ],
       "ticket": "feature",
-      "note": "黏土英雄 GO!（提供 12 歲以下手作材料）"
+      "note": "黏土英雄 GO!（提供 12 歲以下手作材料）",
+      "guests": "瓦克創想工坊；《沙怪與小烏龜》Tejas Ewing／編劇"
     },
     {
       "id": "s0028",
@@ -1327,9 +1386,11 @@
       "start": "15:20",
       "end": "17:18",
       "tags": [
-        "filmmaker_talk"
+        "filmmaker_talk",
+        "pre_greeting"
       ],
-      "ticket": "feature"
+      "ticket": "feature",
+      "guests": "和曉丹／導演；謝兆偉／多倫多亞洲電影節藝術總監"
     },
     {
       "id": "s0029",
@@ -1339,9 +1400,11 @@
       "start": "19:00",
       "end": "20:20",
       "tags": [
-        "filmmaker_talk"
+        "filmmaker_talk",
+        "pre_greeting"
       ],
-      "ticket": "feature"
+      "ticket": "feature",
+      "guests": "全周映／導演；謝兆偉／多倫多亞洲電影節藝術總監"
     },
     {
       "id": "s0030",
@@ -1351,9 +1414,11 @@
       "start": "10:30",
       "end": "12:00",
       "tags": [
-        "filmmaker_talk"
+        "filmmaker_talk",
+        "pre_greeting"
       ],
-      "ticket": "feature"
+      "ticket": "feature",
+      "guests": "沈騏、王師／監製、王一訢／導演、雪羊／聯合製片"
     },
     {
       "id": "s0031",
@@ -1375,7 +1440,8 @@
       "tags": [
         "filmmaker_talk"
       ],
-      "ticket": "feature"
+      "ticket": "feature",
+      "guests": "馬志翔／導演；保卜．巴督路、牧森、馬力梵．高麓、歷瓦厄繞．希細勒／演員"
     },
     {
       "id": "s0033",
@@ -1408,7 +1474,8 @@
         "filmmaker_talk"
       ],
       "ticket": "feature",
-      "note": "《廚師發辦》好好味場：散場享香港美食"
+      "note": "《廚師發辦》好好味場：散場享香港美食",
+      "guests": "鍾宏杰、黃浩然／導演暨編劇；鄺珮詩、吳奇龍、陳保英／監製；盧鎮業、葉蘊儀、馬騮搣／演員；高勤倫／混音師"
     },
     {
       "id": "s0036",
@@ -1450,7 +1517,8 @@
       "tags": [
         "filmmaker_talk"
       ],
-      "ticket": "short"
+      "ticket": "short",
+      "guests": "《我在法國學到的三件事》洪德高／導演（線上連線）；《伙房》林宛蓁／導演、黃以誠／副導；《我朋友的故事》林奕伶／導演（線上連線）；《圓環的告別》丁冠濠／導演、黃彥綺／製片暨編劇協力；《靈魂》鄭安群／導演、吳秉宸／演員"
     },
     {
       "id": "s0040",
@@ -1462,7 +1530,8 @@
       "tags": [
         "filmmaker_talk"
       ],
-      "ticket": "short"
+      "ticket": "short",
+      "guests": "《散步》顏鼎紘／導演、洪振嘉／製片；《西瓜樂園》孫明宇、劉芳彣／導演；《我在去找你的路上》楊詠亘／導演、辜豑瑩／製片暨美術；《飛機降落之前》郭柏云／導演；《Somewhere in Time, 河與石頭》黃芝嘉／導演、林意箴／演員"
     },
     {
       "id": "s0041",
@@ -1485,7 +1554,8 @@
         "filmmaker_talk"
       ],
       "note": "12:00–21:00 自由進出，免費入場",
-      "ticket": "free"
+      "ticket": "free",
+      "guests": "曾威量、劉純佑、陳瑭羚、邱予慧／影像團隊"
     },
     {
       "id": "s0043",
@@ -1495,10 +1565,12 @@
       "start": "13:00",
       "end": "13:42",
       "tags": [
-        "audience_activity"
+        "audience_activity",
+        "filmmaker_talk"
       ],
       "ticket": "feature",
-      "note": "兒童劇：咕嚕嚕大風吹（豆子劇團）"
+      "note": "兒童劇：咕嚕嚕大風吹（豆子劇團）",
+      "guests": "豆子劇團"
     },
     {
       "id": "s0044",
@@ -1552,7 +1624,8 @@
       "tags": [
         "filmmaker_talk"
       ],
-      "ticket": "feature"
+      "ticket": "feature",
+      "guests": "鍾宏杰、黃浩然／導演暨編劇；盧鎮業、馬騮搣／演員"
     },
     {
       "id": "s0049",
@@ -1564,7 +1637,8 @@
       "tags": [
         "filmmaker_talk"
       ],
-      "ticket": "short"
+      "ticket": "short",
+      "guests": "《灰燼與回音》柯若帆／導演、Warat Bureephakdee／製片"
     },
     {
       "id": "s0050",
@@ -1836,7 +1910,8 @@
       "tags": [
         "filmmaker_talk"
       ],
-      "ticket": "feature"
+      "ticket": "feature",
+      "guests": "阿米爾．納德瑞／導演；馬吉德．尼魯曼德／演員"
     },
     {
       "id": "s0077",
@@ -1878,7 +1953,8 @@
       "tags": [
         "filmmaker_talk"
       ],
-      "ticket": "feature"
+      "ticket": "feature",
+      "guests": "康斯坦蒂娜．柯薩瑪尼／導演"
     },
     {
       "id": "s0081",
@@ -1950,7 +2026,8 @@
       "tags": [
         "filmmaker_talk"
       ],
-      "ticket": "short"
+      "ticket": "short",
+      "guests": "《能見度頗高》嚴尚民／導演、陳偉鑫／攝影指導、聶力涵、李卓兒／發行；《金邊夜行夢》寧卡維／導演；《謝謝你還在乎我》派翠克．詹姆斯．弗林／導演"
     },
     {
       "id": "s0088",
@@ -1972,7 +2049,8 @@
       "tags": [
         "filmmaker_talk"
       ],
-      "ticket": "feature"
+      "ticket": "feature",
+      "guests": "洪子鵬／導演；李國毅、邵雨薇、施柏宇、黑嘉嘉／演員"
     },
     {
       "id": "s0090",
@@ -1985,7 +2063,8 @@
         "filmmaker_talk",
         "no_english_subtitles"
       ],
-      "ticket": "feature"
+      "ticket": "feature",
+      "guests": "曹瑞原／導演；黃旭熙 LUCAS、林廷憶、盧以恩、范少勳、黃聖球／演員"
     },
     {
       "id": "s0091",
@@ -2005,10 +2084,12 @@
       "start": "10:30",
       "end": "11:12",
       "tags": [
-        "audience_activity"
+        "audience_activity",
+        "filmmaker_talk"
       ],
       "ticket": "feature",
-      "note": "森森運動會（鴨子老師）"
+      "note": "森森運動會（鴨子老師）",
+      "guests": "鴨子老師／戲劇遊戲老師"
     },
     {
       "id": "s0093",
@@ -2020,7 +2101,8 @@
       "tags": [
         "filmmaker_talk"
       ],
-      "ticket": "feature"
+      "ticket": "feature",
+      "guests": "《那個掉屑的她》許介亭／導演、林宴慈、ANGIE 安吉／演員；《貝果超人》王彥蘋／導演、林廷憶、鄧筠熹／演員；《愛的鼓勵》簡莉穎／導演、張洛偍、林敬倫、康祥／演員"
     },
     {
       "id": "s0094",
@@ -2034,7 +2116,8 @@
         "no_english_subtitles"
       ],
       "ticket": "feature",
-      "note": "映後接導演講堂 17:10"
+      "note": "映後接導演講堂 17:10",
+      "guests": "康斯坦蒂娜．柯薩瑪尼／導演（映後接導演講堂）"
     },
     {
       "id": "s0095",
@@ -2046,7 +2129,8 @@
       "tags": [
         "filmmaker_talk"
       ],
-      "ticket": "feature"
+      "ticket": "feature",
+      "guests": "《阿特烈》孫介珩／導演、蔡雨氛／編劇；《深邃美麗的亞細亞：老和尚與貓怪》陳奕仁／導演；《一九四五》張永昌／導演"
     },
     {
       "id": "s0096",
@@ -2058,7 +2142,8 @@
       "tags": [
         "filmmaker_talk"
       ],
-      "ticket": "feature"
+      "ticket": "feature",
+      "guests": "《娃娃娃》謝沛如／導演、林志朋／攝影師；《卡童》郭憲聰／監製；《寂寞愛德華》施宥全／導演；《蛋堡 MV》王宗欣、曾忠嶽／導演"
     },
     {
       "id": "s0097",
@@ -2112,7 +2197,8 @@
       "tags": [
         "filmmaker_talk"
       ],
-      "ticket": "short"
+      "ticket": "short",
+      "guests": "《羊蹄男孩》Fariba Arab／製片；《我們之間的藍幕》莎拉．里茲基娜／導演、Bimo Deviantoputra／攝影；《兄弟不眠夜》派崔克．龐甘／導演、Diokko Dionisio／製片；《錯誤目標》康成準／導演、車榮材／攝影、錦嬪、白昇曣／演員"
     },
     {
       "id": "s0102",
@@ -2135,7 +2221,8 @@
       "tags": [
         "filmmaker_talk"
       ],
-      "ticket": "short"
+      "ticket": "short",
+      "guests": "《海是最漫長的等待》陳氏荷莊／導演、Trinh Thanh Phuoc Loc／攝影；《名畫像素浩劫》雷歐．布蘭迪諾／導演；《稻草人》格雷瓜爾．蓬特卡伊／導演"
     },
     {
       "id": "s0104",
@@ -2177,7 +2264,8 @@
       "tags": [
         "filmmaker_talk"
       ],
-      "ticket": "feature"
+      "ticket": "feature",
+      "guests": "康斯坦蒂娜．柯薩瑪尼／導演"
     },
     {
       "id": "s0108",
@@ -2190,7 +2278,8 @@
         "filmmaker_talk"
       ],
       "ticket": "feature",
-      "note": "映後接主題講堂 14:30"
+      "note": "映後接主題講堂 14:30",
+      "guests": "《鳥居》曾敬懿／導演、奚岳隆／發起日影視創辦人；《穿越生死之門》劉炯葰／導演；《阿鈔正傳》仇晟／導演（映後接主題講堂）"
     },
     {
       "id": "s0109",
@@ -2202,7 +2291,8 @@
       "tags": [
         "filmmaker_talk"
       ],
-      "ticket": "feature"
+      "ticket": "feature",
+      "guests": "田中未來／導演、達富航平／攝影師"
     },
     {
       "id": "s0110",
@@ -2224,7 +2314,8 @@
       "tags": [
         "filmmaker_talk"
       ],
-      "ticket": "short"
+      "ticket": "short",
+      "guests": "《抓耙仔》許筱玟／導演；《彈彈琴猜猜拳》KANG Eun-jung／導演、LEE Seung-hyun／攝影、LEE A-IM／演員"
     },
     {
       "id": "s0112",
@@ -2266,7 +2357,8 @@
       "tags": [
         "filmmaker_talk"
       ],
-      "ticket": "short"
+      "ticket": "short",
+      "guests": "《水火山》廖鏡文／攝影、林延融／聲音設計、李鈺婕／演員；《埋葬的孩子》王登鈺、楊雅婷／導演；《你吹 Do，我吹 Si》莊榮祚／導演、陳厚廷／製片；《老男人》賴俊亘／導演、呂慧恬／製片、夏靖庭、喜翔／演員；《漢斯的尾巴》黃詩柔、紀培慧／導演"
     },
     {
       "id": "s0116",
@@ -2291,7 +2383,8 @@
       "tags": [
         "filmmaker_talk"
       ],
-      "ticket": "short"
+      "ticket": "short",
+      "guests": "《島上有聲，霧裡有人，夢中有神》林羿綺／導演、陳敬寶／顧問；《你不在這個蛋糕裡》陳亭叡／導演；《順其自然》秦海／導演、王天霸／製片暨編劇、章梓琪／美術暨造型；《演出／日》侯季然／導演、林佳儒／製片、王統生、張名君／國家兩廳院；《螳螂》謝文明／導演、陳淑芳／演員"
     },
     {
       "id": "s0119",
@@ -2365,7 +2458,8 @@
       "tags": [
         "filmmaker_talk"
       ],
-      "ticket": "feature"
+      "ticket": "feature",
+      "guests": "《鳥居》曾敬懿／導演"
     },
     {
       "id": "s0126",
@@ -2702,7 +2796,8 @@
       "tags": [
         "filmmaker_talk"
       ],
-      "ticket": "feature"
+      "ticket": "feature",
+      "guests": "高昇鉉／導演；呂大鉉、李河音／演員"
     },
     {
       "id": "s0159",
@@ -2775,7 +2870,8 @@
       "tags": [
         "filmmaker_talk"
       ],
-      "ticket": "feature"
+      "ticket": "feature",
+      "guests": "蘇鈺淳／導演"
     },
     {
       "id": "s0166",
@@ -2787,7 +2883,8 @@
       "tags": [
         "filmmaker_talk"
       ],
-      "ticket": "feature"
+      "ticket": "feature",
+      "guests": "吉田惠輔／導演；磯村勇斗、末澤誠也／演員"
     },
     {
       "id": "s0167",
@@ -2809,7 +2906,8 @@
       "tags": [
         "filmmaker_talk"
       ],
-      "ticket": "feature"
+      "ticket": "feature",
+      "guests": "宇賀那健一／導演；板橋春樹、松原怜香、林更紗、佐佐木穗高／演員"
     },
     {
       "id": "s0169",
@@ -2821,7 +2919,8 @@
       "tags": [
         "filmmaker_talk"
       ],
-      "ticket": "feature"
+      "ticket": "feature",
+      "guests": "宇賀那健一／導演；絢寧、佐佐木穗高／演員"
     },
     {
       "id": "s0170",
@@ -2895,10 +2994,12 @@
       "start": "13:00",
       "end": "13:46",
       "tags": [
-        "audience_activity"
+        "audience_activity",
+        "filmmaker_talk"
       ],
       "ticket": "feature",
-      "note": "動畫說書人（現場配音）"
+      "note": "動畫說書人（現場配音）",
+      "guests": "吳奕倫、鄭佳如／電影辯士"
     },
     {
       "id": "s0177",
@@ -2940,7 +3041,8 @@
       "tags": [
         "filmmaker_talk"
       ],
-      "ticket": "feature"
+      "ticket": "feature",
+      "guests": "李昭樺／導演；李李仁、張軒睿、王渝萱／演員"
     },
     {
       "id": "s0181",
@@ -2952,7 +3054,8 @@
       "tags": [
         "filmmaker_talk"
       ],
-      "ticket": "feature"
+      "ticket": "feature",
+      "guests": "謝庭菡／導演；劉奕兒、陽靚／演員"
     },
     {
       "id": "s0182",
@@ -2985,10 +3088,12 @@
       "start": "13:00",
       "end": "13:52",
       "tags": [
-        "no_english_subtitles"
+        "no_english_subtitles",
+        "filmmaker_talk"
       ],
       "ticket": "feature",
-      "note": "法式腹語術（小強老師）"
+      "note": "法式腹語術（小強老師）",
+      "guests": "小強老師／腹語藝術老師"
     },
     {
       "id": "s0185",
@@ -3000,7 +3105,8 @@
       "tags": [
         "filmmaker_talk"
       ],
-      "ticket": "feature"
+      "ticket": "feature",
+      "guests": "蘇鈺淳／導演；王渝萱、王渝屏／演員"
     },
     {
       "id": "s0186",
@@ -3012,7 +3118,8 @@
       "tags": [
         "filmmaker_talk"
       ],
-      "ticket": "feature"
+      "ticket": "feature",
+      "guests": "姜瑞智、劉佩宜／導演、潘心慧／監製、林珮瑜／製作人暨編劇、希澄／原著小說作者、李聞熙、袁漠遙／演員"
     },
     {
       "id": "s0187",
@@ -3044,7 +3151,8 @@
       "tags": [
         "filmmaker_talk"
       ],
-      "ticket": "feature"
+      "ticket": "feature",
+      "guests": "高昇鉉／導演；呂大鉉／演員"
     },
     {
       "id": "s0190",
@@ -3056,7 +3164,8 @@
       "tags": [
         "filmmaker_talk"
       ],
-      "ticket": "feature"
+      "ticket": "feature",
+      "guests": "宇賀那健一／導演；板橋春樹、松原怜香、林更紗、佐佐木穗高／演員"
     },
     {
       "id": "s0191",
@@ -3068,7 +3177,8 @@
       "tags": [
         "filmmaker_talk"
       ],
-      "ticket": "feature"
+      "ticket": "feature",
+      "guests": "宇賀那健一／導演；絢寧、佐佐木穗高／演員"
     },
     {
       "id": "s0192",
@@ -3121,7 +3231,8 @@
       "tags": [
         "filmmaker_talk"
       ],
-      "ticket": "feature"
+      "ticket": "feature",
+      "guests": "影人陣容待公布"
     },
     {
       "id": "s0197",
@@ -3135,7 +3246,8 @@
         "halloween"
       ],
       "ticket": "feature",
-      "note": "好膽就來場（首映劇集、復刻場景）"
+      "note": "好膽就來場（首映劇集、復刻場景）",
+      "guests": "李烈、黃江豐／監製、林亞佑／導演；楊貴媚、鄒暟澐、許展翔、梁呈宇、楊承軒／演員"
     },
     {
       "id": "s0198",
@@ -3150,7 +3262,8 @@
         "no_english_subtitles"
       ],
       "ticket": "special",
-      "note": "我好興奮場（主創見面、簽名）"
+      "note": "我好興奮場（主創見面、簽名）",
+      "guests": "宋鎵琳／監製、林珮瑜／製作人暨編劇；安俊朋、林嘉威、張家勗、擎楷／演員"
     },
     {
       "id": "s0199",
@@ -3162,7 +3275,8 @@
       "tags": [
         "filmmaker_talk"
       ],
-      "ticket": "feature"
+      "ticket": "feature",
+      "guests": "呂柏勳／導演、周增晟、蘇瑜豪／製片；王傑登、龎蕾馨、陳邦鋆、紹宇匯、尤冠恩、蔡秉辰／演員"
     },
     {
       "id": "s0200",

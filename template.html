@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>2026 高雄電影節_排片小工具</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Huninn&display=swap" rel="stylesheet">
 <style>
 /* ============================================================
    設計基調（沿用 movie-project）
@@ -11,10 +14,17 @@
    時間全部用等寬數字（tabular-nums），時刻表才會對齊。
    ============================================================ */
 :root{
-  --paper:#FBFAF7; --ink:#16161A; --muted:#74736E; --line:#E4E2DC;
-  --pine:#1F4D46; --clash:#B23B32; --tight:#A9641E; --card:#FFFFFF;
-  --star:#8A5A00;
-  --heart:#B8434A;
+  --paper:#FBFAF7; --ink:#34403D; --head:#2E4A45; --tint:#EEF3F1; --muted:#6E6D68; --line:#E4E2DC;
+  --pine:#1F4D46; --pine-soft:#E4EEEA; --clash:#B23B32; --tight:#A9641E; --card:#FFFFFF;
+  --star:#8A5A00; --heart:#B8434A; --like-soft:#FBF3F2; --warn-soft:#FDF7F6;
+  --round:"Huninn","jf open 粉圓 2.0","jf-openhuninn-2.0","Arial Rounded MT Bold","PingFang TC","Microsoft JhengHei",sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#141615; --ink:#E4E6E2; --head:#CFE3DD; --tint:#1F2B28; --muted:#9A9993; --line:#2E3230;
+    --pine:#5FA597; --pine-soft:#1C2A27; --clash:#E0766C; --tight:#D8A05E; --card:#1B1E1D;
+    --star:#D8B06A; --heart:#D9707A; --like-soft:#2A1F21; --warn-soft:#241C1B;
+  }
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{
@@ -22,33 +32,34 @@ body{
   background:var(--paper);color:var(--ink);line-height:1.6;font-size:15px;
   padding-bottom:96px;
 }
-.wrap{max-width:640px;margin:0 auto;padding:0 16px}
+.wrap{max-width:980px;margin:0 auto;padding:0 16px}
+#paneFilms,#paneList,header .headinner{max-width:640px;margin:0 auto}
 time,.num{font-variant-numeric:tabular-nums}
 
 header{padding:28px 0 20px;border-bottom:1px solid var(--line);margin-bottom:20px}
-h1{font-size:26px;font-weight:700;letter-spacing:-.02em}
+h1{font-family:var(--round);font-size:26px;font-weight:400;letter-spacing:.01em;color:var(--head)}
 .sub{color:var(--muted);font-size:13px;margin-top:4px}
 
 .tabs{display:flex;gap:4px;margin-bottom:20px}
-.tab{flex:1;padding:10px;border:1px solid var(--line);background:transparent;border-radius:8px;
+.tab{flex:1;padding:10px;border:1px solid var(--line);background:transparent;border-radius:999px;font-family:var(--round);
   font:inherit;font-size:14px;color:var(--muted);cursor:pointer}
 .tab[aria-selected="true"]{background:var(--pine);border-color:var(--pine);color:#fff}
 .tab:focus-visible{outline:2px solid var(--pine);outline-offset:2px}
 
 /* 日期橫向捲動列：影展只有 18 天，一眼看完比下拉選單好用 */
 .days{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:14px;scrollbar-width:thin}
-.dchip{flex:none;min-width:52px;padding:6px 8px;border:1px solid var(--line);border-radius:8px;
+.dchip{flex:none;min-width:52px;padding:6px 8px;border:1px solid var(--line);border-radius:12px;
   background:var(--card);font:inherit;cursor:pointer;text-align:center;line-height:1.3;color:var(--ink)}
 .dchip b{display:block;font-size:15px}
 .dchip small{font-size:11px;color:var(--muted)}
 .dchip[aria-pressed="true"]{background:var(--pine);border-color:var(--pine);color:#fff}
-.dchip[aria-pressed="true"] small{color:#CFE0DB}
+.dchip[aria-pressed="true"] small{color:var(--pine-soft)}
 .dchip .dot{display:block;width:5px;height:5px;border-radius:50%;margin:3px auto 0;background:transparent}
 .dchip.has .dot{background:var(--pine)}
 .dchip[aria-pressed="true"].has .dot{background:#fff}
 .dchip:focus-visible{outline:2px solid var(--pine);outline-offset:2px}
 
-.filters{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-bottom:10px}
 .filters label{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}
 select,input[type=search]{width:100%;padding:9px 10px;font:inherit;font-size:14px;
   border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink)}
@@ -58,7 +69,7 @@ select:focus,input:focus{outline:2px solid var(--pine);outline-offset:-1px}
 .toggles{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px}
 .tg{padding:5px 10px;border:1px solid var(--line);border-radius:999px;background:var(--card);
   font:inherit;font-size:12.5px;color:var(--muted);cursor:pointer}
-.tg[aria-pressed="true"]{border-color:var(--pine);color:var(--pine);background:#F2F6F4}
+.tg[aria-pressed="true"]{border-color:var(--pine);color:var(--pine);background:var(--pine-soft)}
 .tg.danger{margin-left:auto;color:var(--clash);border-color:#E7C3BF}
 .tg.danger[disabled]{color:var(--muted);border-color:var(--line);cursor:default;opacity:.6}
 .tg:focus-visible{outline:2px solid var(--pine);outline-offset:2px}
@@ -70,7 +81,7 @@ select:focus,input:focus{outline:2px solid var(--pine);outline-offset:-1px}
   border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:8px;
   font:inherit;color:inherit;cursor:pointer}
 .row:focus-visible{outline:2px solid var(--pine);outline-offset:2px}
-.row[data-picked="1"]{border-color:var(--pine);background:#F2F6F4}
+.row[data-picked="1"]{border-color:var(--pine);background:var(--pine-soft)}
 .row[data-past="1"]{opacity:.5}
 .row .when{min-width:52px;font-size:17px;font-weight:600}
 .row .when small{display:block;font-size:11.5px;font-weight:400;color:var(--muted)}
@@ -94,6 +105,10 @@ select:focus,input:focus{outline:2px solid var(--pine);outline-offset:-1px}
 .tag.rate{border-color:#C9D6D2;color:var(--pine)}
 .tag.r18{border-color:#E7C3BF;color:var(--clash)}
 .tag.talk{border-color:#E6D3A8;color:var(--star)}
+.tag.dist{border-color:#BFC7E0;color:#34457A}
+.guests{display:block;font-size:12px;color:var(--muted);margin-top:4px;line-height:1.5}
+.guests b{color:var(--star);font-weight:600}
+.shows .guests{margin-top:2px}
 .tag.free{border-color:#C9D6D2;color:var(--pine)}
 
 .day{margin-bottom:26px}
@@ -155,7 +170,7 @@ dialog::backdrop{background:rgba(22,22,26,.45)}
 .intro{font-size:13.5px;color:var(--muted);margin-bottom:14px}
 .film{display:flex;gap:12px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
   border-radius:10px;padding:12px 14px;margin-bottom:8px}
-.film[data-liked="1"]{border-color:var(--heart);background:#FBF3F2}
+.film[data-liked="1"]{border-color:var(--heart);background:var(--like-soft)}
 .film .body{flex:1;min-width:0}
 .film .title{display:block;font-weight:600;word-break:break-word}
 .film a.title{color:inherit;text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px}
@@ -221,6 +236,55 @@ dialog::backdrop{background:rgba(22,22,26,.45)}
 .proposal .miss li .d{color:var(--clash)}
 .legend{font-size:12px;color:var(--muted);margin-top:20px;line-height:1.8}
 @media(prefers-reduced-motion:no-preference){.row{transition:border-color .12s,background .12s}}
+
+/* ---------- 找場次：一個放映廳一欄的時刻表 ---------- */
+.sheet{margin:14px 0 40px}
+.sheethead{display:flex;align-items:center;justify-content:center;gap:10px;margin:0 0 16px;
+  color:var(--head);font-family:var(--round);font-weight:400}
+.sheethead .d{font-size:36px;line-height:1;letter-spacing:.03em}
+.sheethead .w{font-size:13px;letter-spacing:.12em;padding:3px 10px;border-radius:999px;background:var(--tint)}
+.sheethead .t{font-size:12px;padding:3px 10px;border-radius:999px;background:var(--pine);color:var(--paper)}
+.gridscroll{overflow-x:auto;margin:0 -16px;padding:2px 16px 8px;-webkit-overflow-scrolling:touch}
+.grid{display:grid;grid-template-columns:repeat(var(--cols),minmax(210px,1fr));gap:8px 12px;min-width:min-content}
+.gh{background:var(--tint);color:var(--head);text-align:center;padding:12px 10px 11px;border-radius:18px;
+  line-height:1.35;margin-bottom:4px}
+.gh b{display:block;font-family:var(--round);font-weight:400;font-size:15px;letter-spacing:.02em}
+.gh span{display:block;font-size:11px;color:var(--muted);margin-top:1px}
+.gh em{display:inline-block;font-style:normal;font-size:11px;margin-top:6px;padding:1px 9px;
+  border-radius:999px;background:var(--card);color:var(--tight)}
+.cell{display:flex;gap:12px;align-items:flex-start;text-align:left;padding:12px 14px;border:1px solid var(--line);
+  border-radius:16px;background:var(--card);cursor:pointer;min-width:0;font:inherit;color:inherit}
+.cell .ct{flex:none;min-width:44px;font-family:var(--round);font-size:16px;color:var(--pine);line-height:1.2;text-align:center}
+.cell .ct small{display:block;font-family:inherit;font-size:11px;color:var(--muted);margin-top:4px}
+.cell .ct .ok{display:none;margin:7px auto 0;width:20px;height:20px;border-radius:50%;
+  background:var(--pine);color:var(--paper);font-size:11px;line-height:20px}
+.cell .cb{flex:1;display:flex;flex-direction:column;min-width:0;align-self:stretch}
+.cell .csec{font-size:11px;color:var(--muted)}
+.cn{font-family:var(--round);font-size:15px;line-height:1.45;color:var(--head);word-break:break-word}
+.cn .lv{color:var(--heart);margin-right:3px}
+.ce{font-size:11.5px;line-height:1.4;color:var(--muted);margin-top:1px;word-break:break-word}
+.cf{margin-top:auto;padding-top:8px;font-size:11px;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 6px;align-items:center}
+.cf .ev{padding:0 7px;border-radius:999px;background:var(--tint);color:var(--tight)}
+.cf .talk{color:var(--star)}
+.cf .dist{color:#34457A}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .cf .dist{color:#9FB2E8}}
+.cf .hit{color:var(--clash)}
+.cf .hit.w{color:var(--tight)}
+.cell:hover{border-color:var(--pine)}
+.cell[data-picked="1"]{background:var(--pine-soft);border-color:var(--pine)}
+.cell[data-picked="1"] .ct .ok{display:block}
+.cell[data-past="1"]{opacity:.55}
+.cell[data-hit="bad"]:not([data-picked="1"]){border-color:#E7C3BF;background:var(--warn-soft)}
+.cell[data-hit="warn"]:not([data-picked="1"]){border-color:#EBD6BC}
+.cell.empty{cursor:default;background:transparent;border:1.5px dashed var(--line)}
+.cell.off{align-items:center;justify-content:center;text-align:center;font-family:var(--round);
+  color:var(--muted);font-size:14px;line-height:1.7}
+.cell:focus-visible{outline:2px solid var(--pine);outline-offset:2px}
+.listnote{font-family:var(--round);color:var(--head);margin:18px 0 8px}
+/* 圓體用在標題類文字，和 kh_theatergoing 一致 */
+.film .title,.row .title,.slot .card .title,.vhead,.sechead,.empty strong,
+.day h2,.dlghead h2,.plan h2,.count strong{font-family:var(--round);font-weight:400;color:var(--head)}
+.tg,.pill,.btn,.tab,.dchip b{font-family:var(--round)}
 </style>
 </head>
 <body>
@@ -297,7 +361,7 @@ dialog::backdrop{background:rgba(22,22,26,.45)}
       <div class="full"><label for="fMovie">影片</label><select id="fMovie"></select></div>
       <div class="full">
         <label for="fText">關鍵字</label>
-        <input type="search" id="fText" placeholder="片名或主題">
+        <input type="search" id="fText" placeholder="片名、主題或影人">
       </div>
     </div>
     <div class="toggles">
@@ -399,7 +463,7 @@ const PLACE = {
 };
 const KIND_LABEL = {film:"長短片", xr:"XR DREAMLAND", event:"活動"};
 const RATE_LABEL = {"0+":"普遍級","6+":"保護級","12+":"輔12","15+":"輔15","18+":"限制級"};
-const TAG_LABEL = {filmmaker_talk:"★ 影人出席", audience_activity:"◎ 活動場",
+const TAG_LABEL = {filmmaker_talk:"★ 影人出席", pre_greeting:"★ 映前打招呼", audience_activity:"◎ 活動場",
   halloween:"🎃 萬聖節場", no_english_subtitles:"▲ 無英文字幕",
   multi_participant:"多人同步體驗・請準時", nudity:"含裸露", variable_length:"時長依進度，上限 45 分"};
 
@@ -494,6 +558,7 @@ function normalize(data){
       venue_id:s.venue_id, venue:(venues[s.venue_id]||{}).name||s.venue_id,
       short:p.short, place:p.place,
       tags:s.tags||[], ticket:s.ticket||"feature", note:s.note||"",
+      guests:s.guests||"", dist:f.distribution||"", distShort:f.distribution_short||"",
       freeflow: s.ticket === "free",      // 自由進出，不列入撞場檢查
     });
   });
@@ -608,6 +673,8 @@ function eventDesc(s){
     s.runtime ? `片長 ${s.runtime} 分鐘` : null,
     s.rating ? `分級 ${s.rating}` : null,
     s.tags.map(t => TAG_LABEL[t]).filter(Boolean).join("、") || null,
+    s.guests ? `出席影人：${s.guests}` : null,
+    s.dist ? `臺灣代理發行：${s.dist}` : null,
     s.seats ? `每場 ${s.seats} 人` : null,
     s.fee ? `費用：${s.fee}` : null,
     s.note || null,
@@ -716,7 +783,7 @@ function currentResults(){
     (!m || s.film_id === m) &&
     matchType(s, ty) &&
     (!sec || s.section === sec) &&
-    (!t || [s.title, s.en, s.section, s.code, s.note].some(x => x && x.toLowerCase().includes(t))) &&
+    (!t || [s.title, s.en, s.section, s.code, s.note, s.guests].some(x => x && x.toLowerCase().includes(t))) &&
     (!talk || s.tags.includes("filmmaker_talk")) &&
     (!on("tLiked") || LIKED.has(s.film_id)) &&
     (!age || s.rating !== "18+") &&
@@ -733,6 +800,7 @@ function badgeHtml(s){
   }
   if(s.runtime) out.push(`<span class="tag num">${s.runtime} 分</span>`);
   s.tags.forEach(t => out.push(`<span class="tag ${t==="filmmaker_talk"?"talk":""}">${TAG_LABEL[t]||t}</span>`));
+  if(s.distShort) out.push(`<span class="tag dist" title="臺灣代理發行：${escHtml(s.dist)}">🎬 代理發行・${escHtml(s.distShort)}</span>`);
   if(s.ticket === "special") out.push(`<span class="tag">特殊票 ${PRICES.special?.regular??""}</span>`);
   if(s.ticket === "short") out.push(`<span class="tag">短片票</span>`);
   if(s.seats) out.push(`<span class="tag num">每場 ${s.seats} 人</span>`);
@@ -761,11 +829,88 @@ function rowHtml(s, picks, showDate){
       ${s.en ? `<span class="en">${escHtml(s.en)}</span>` : ""}
       <span class="meta">${s.code ? escHtml(s.code)+"・" : ""}${showDate ? dayLabel(s.date)+" " : ""}${escHtml(s.short)}${s.note?"・"+escHtml(s.note):""}</span>
       ${badgeHtml(s)}
+      ${s.guests ? `<span class="guests"><b>★ 影人出席</b>：${escHtml(s.guests)}</span>` : ""}
       ${note}
     </span>
   </button>`;
 }
 
+/* ---------- 找場次：一天一張表，一個放映廳一欄 ---------- */
+// 時刻表只放這四個主要放映廳，其餘場地（2F 放映室、駁二、講座場地等）走下方清單
+const COL_ORDER = ["lib","n1","n2","kfa"];
+const GRID_VENUES = new Set(COL_ORDER);
+const COL_EN = {lib:"Kaohsiung Main Public Library 7F", n1:"Neiwei Arts Center Reel ONE",
+  n2:"Neiwei Arts Center Reel TWO", kfa:"Kaohsiung Film Archive"};
+const TODAY = new Date(Date.now() + 8*3600e3).toISOString().slice(0,10);
+const BAND_WINDOW = 90;        // 同一列裡，最早與最晚開演相差不超過幾分鐘
+const shortOf = id => (PLACE[id]||{}).short || id;
+
+// 這天沒有放映的廳就不出現
+function columnsFor(list){
+  const used = new Set(list.map(s => s.venue_id));
+  return COL_ORDER.filter(id => used.has(id))
+    .map(id => ({id, name:shortOf(id), en:COL_EN[id] || ""}));
+}
+// 依開演時間分列：同一列每個廳最多一場
+function buildBands(list){
+  const bands = [];
+  let cur = null;
+  list.forEach(s => {
+    const t = toDate(s.start).getTime();
+    if(!cur || cur.cells[s.venue_id] || (t - cur.t0) / 60000 >= BAND_WINDOW){
+      cur = {t0:t, cells:{}};
+      bands.push(cur);
+    }
+    cur.cells[s.venue_id] = s;
+  });
+  return bands;
+}
+// 時刻表格子空間有限，影人只留前兩組，完整名單在選電影與我的片單
+function guestBrief(g){
+  const parts = g.split("；");
+  return parts.length > 2 ? parts.slice(0,2).join("；") + " 等" : g;
+}
+function cellHtml(s, picks){
+  const isOn = picks.has(s.id);
+  const hit = isOn ? null : hitWith(s);
+  const w = whenText(s);
+  const past = toDate(s.start) < new Date() ? "1" : "0";
+  const foot = [
+    s.runtime ? `<span class="num">${s.runtime} 分</span>` : "",
+    s.rating === "18+" ? `<span class="ev">限制級</span>` : "",
+    s.tags.includes("filmmaker_talk") ? `<span class="talk">★ 影人出席</span>` : "",
+    s.tags.includes("pre_greeting") ? `<span class="talk">★ 映前打招呼</span>` : "",
+    s.distShort ? `<span class="dist">🎬 ${escHtml(s.distShort)}</span>` : "",
+    s.tags.includes("no_english_subtitles") ? `<span>▲ 無英文字幕</span>` : "",
+    s.note ? `<span>${escHtml(s.note)}</span>` : "",
+    hit ? `<span class="hit ${hit.level === "bad" ? "" : "w"}">${hit.level === "bad" ? "會撞到" : "太趕："}《${escHtml(hit.other.title)}》${hhmm(hit.other.start)}</span>` : "",
+  ].filter(Boolean).join("");
+  return `<button class="cell" data-id="${s.id}" data-picked="${isOn?1:0}" data-hit="${hit?hit.level:""}"
+    data-past="${past}" aria-pressed="${isOn}" aria-label="${isOn?"移除":"加入"} ${w.a} ${escHtml(s.title)}">
+    <span class="ct num">${w.a}${w.b?`<small>${w.b}</small>`:""}<span class="ok" aria-hidden="true">✓</span></span>
+    <span class="cb">
+      <span class="csec">${escHtml(s.section)}</span>
+      <span class="cn">${LIKED.has(s.film_id)?'<span class="lv" aria-label="喜歡">♥</span>':""}${escHtml(s.title)}</span>
+      ${s.en ? `<span class="ce">${escHtml(s.en)}</span>` : ""}
+      ${s.guests ? `<span class="ce">★ ${escHtml(guestBrief(s.guests))}</span>` : ""}
+      <span class="cf">${foot}</span>
+    </span>
+  </button>`;
+}
+function gridHtml(dayList, picks){
+  const cols = columnsFor(dayList);
+  const bands = buildBands(dayList);
+  const head = cols.map((c,i) =>
+    `<div class="gh" style="grid-column:${i+1};grid-row:1"><b>${escHtml(c.name)}</b>${
+      c.en?`<span>${escHtml(c.en)}</span>`:""}</div>`).join("");
+  const body = bands.map((b,r) => cols.map((c,i) => {
+    const pos = `grid-column:${i+1};grid-row:${r+2}`;
+    const s = b.cells[c.id];
+    return s ? cellHtml(s, picks).replace("<button ", `<button style="${pos}" `)
+             : `<div class="cell empty" style="${pos}" aria-hidden="true"></div>`;
+  }).join("")).join("");
+  return `<div class="gridscroll"><div class="grid" style="--cols:${cols.length}">${head}${body}</div></div>`;
+}
 function renderResults(){
   const list = currentResults();
   $("count").textContent = `${list.length} 場`;
@@ -774,27 +919,44 @@ function renderResults(){
     return;
   }
   const picks = new Set(PICKED_IDS);
-  const shown = list.slice(0, 300);        // 一次最多畫 300 筆，手機才不會卡
-  let html = "", last = null;
-  shown.forEach(s => {
-    const key = DAY ? null : s.date;
-    if(key && key !== last){ html += `<h3 class="vhead">${dayLabel(key)}</h3>`; last = key; }
-    html += rowHtml(s, picks, false);
-  });
-  if(list.length > shown.length)
-    html += `<p class="count">還有 ${list.length - shown.length} 場沒顯示，請選日期或縮小範圍</p>`;
+  // 時刻表：四個主要放映廳、有固定開演時間的場次；其餘一律走清單
+  const inGrid = s => GRID_VENUES.has(s.venue_id) && !s.allDay && s.kind !== "xr";
+  const table = list.filter(inGrid);
+  const rest  = list.filter(s => !inGrid(s));
+  const byDay = {};
+  table.forEach(s => (byDay[s.date] ||= []).push(s));
+  let html = Object.keys(byDay).sort().map(d => {
+    const [y,m,dd] = d.split("-").map(Number);
+    const wd = ["SUN","MON","TUE","WED","THU","FRI","SAT"][new Date(Date.UTC(y,m-1,dd)).getUTCDay()];
+    return `<section class="sheet">
+      <h3 class="sheethead"><span class="d num">${m}.${String(dd).padStart(2,"0")}</span>
+        <span class="w">${wd}</span>${d===TODAY?'<span class="t">今天</span>':""}</h3>
+      ${gridHtml(byDay[d], picks)}
+    </section>`;
+  }).join("");
+  if(rest.length){
+    const shown = rest.slice(0, 200);
+    html += `<h3 class="listnote">${table.length ? "其他場次" : "場次"}：XR 體驗、2F 放映室、講座與展覽（${rest.length}）</h3>`;
+    let last = null;
+    shown.forEach(s => {
+      if(!DAY && s.date !== last){ html += `<h3 class="vhead">${dayLabel(s.date)}</h3>`; last = s.date; }
+      html += rowHtml(s, picks, false);
+    });
+    if(rest.length > shown.length)
+      html += `<p class="count">還有 ${rest.length - shown.length} 個時段沒顯示，請選日期或縮小範圍</p>`;
+  }
   $("results").innerHTML = html;
 }
 
 $("results").addEventListener("click", e => {
-  const row = e.target.closest(".row");
+  const row = e.target.closest(".row, .cell[data-id]");
   if(!row) return;
   const id = row.dataset.id;
   const i = PICKED_IDS.indexOf(id);
   if(i >= 0) PICKED_IDS.splice(i,1); else PICKED_IDS.push(id);
   savePicked();
   renderResults(); renderDays(); renderDock();
-  const again = document.querySelector(`.row[data-id="${id}"]`);
+  const again = document.querySelector(`[data-id="${id}"]`);
   if(again) again.focus();
 });
 
@@ -879,6 +1041,7 @@ function buildFilms(){
   ALL.forEach(s => {
     const f = by[s.film_id] ||= {id:s.film_id, kind:s.kind, code:s.code, title:s.title, en:s.en, url:s.url,
       runtime:s.runtime, rating:s.rating, section:s.section, seats:s.seats, short:s.short,
+      dist:s.dist||"", distShort:s.distShort||"",
       fee:s.fee, note:s.kind === "event" ? s.note : "", shows:[]};
     f.shows.push(s);
   });
@@ -910,6 +1073,7 @@ function filmMeta(f, days, talk){
   bits.push(f.kind === "xr" ? `每天 ${Math.round(f.shows.length / new Set(f.shows.map(s=>s.date)).size)} 場左右・${days}`
     : `${f.shows.length} 場：${days}`);
   if(talk) bits.push("★ 有影人出席");
+  if(f.distShort) bits.push(`🎬 代理發行・${f.distShort}`);
   return bits.map(escHtml).join("・");
 }
 const safeUrl = u => /^https:\/\//.test(u || "");
@@ -991,11 +1155,12 @@ function showList(f){
       other.join("、"),
       s.note ? escHtml(s.note) : "",
     ].filter(Boolean).join("・");
+    const guests = s.guests ? `<span class="guests">${escHtml(s.guests)}</span>` : "";
     const warn = hit ? `<br><span class="${hit.level}">${hit.level==="bad"?"會撞到":"太趕："}《${escHtml(hit.other.title)}》${hhmm(hit.other.start)}</span>` : "";
     const off = AVAIL && !AVAIL.has(s.date) ? `<br>不在你可以去的日子` : "";
     return `<li data-off="${AVAIL && !AVAIL.has(s.date) ? 1 : 0}">
       <span class="t num">${dayLabel(s.date)}<small>${whenText(s).a}${whenText(s).b}</small></span>
-      <span class="i">${info}${warn}${off}</span>
+      <span class="i">${info}${guests}${warn}${off}</span>
       <button class="add" data-add="${s.id}" data-on="${isOn?1:0}" data-hit="${hit?hit.level:""}"
         aria-label="${isOn?"移除":"加入"} ${dayLabel(s.date)} ${hhmm(s.start)} 《${escHtml(s.title)}》">${isOn ? "✓ 已加入" : "加入"}</button>
     </li>`;
