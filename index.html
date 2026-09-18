@@ -281,6 +281,9 @@ dialog::backdrop{background:rgba(22,22,26,.45)}
   color:var(--muted);font-size:14px;line-height:1.7}
 .cell:focus-visible{outline:2px solid var(--pine);outline-offset:2px}
 .listnote{font-family:var(--round);color:var(--head);margin:18px 0 8px}
+.viewtg{margin-left:auto}
+/* 手機的清單模式：場次已照時間排好，廳別直接寫在每一列 */
+.hallrow{display:block;font-size:12px;color:var(--pine);margin-top:2px}
 /* 圓體用在標題類文字，和 kh_theatergoing 一致 */
 .film .title,.row .title,.slot .card .title,.vhead,.sechead,.empty strong,
 .day h2,.dlghead h2,.plan h2,.count strong{font-family:var(--round);font-weight:400;color:var(--head)}
@@ -369,6 +372,7 @@ dialog::backdrop{background:rgba(22,22,26,.45)}
       <button class="tg" id="tTalk" aria-pressed="false">★ 只看影人出席</button>
       <button class="tg" id="tFit" aria-pressed="false">隱藏會撞到片單的場次</button>
       <button class="tg" id="tAge" aria-pressed="false">隱藏 18+</button>
+      <button class="tg viewtg" id="tGrid" aria-pressed="false">▦ 時刻表</button>
     </div>
     <p class="count" id="count"></p>
     <div id="results"></div>
@@ -842,6 +846,10 @@ const GRID_VENUES = new Set(COL_ORDER);
 const COL_EN = {lib:"Kaohsiung Main Public Library 7F", n1:"Neiwei Arts Center Reel ONE",
   n2:"Neiwei Arts Center Reel TWO", kfa:"Kaohsiung Film Archive"};
 const TODAY = new Date(Date.now() + 8*3600e3).toISOString().slice(0,10);
+const VIEW_KEY = "kff2026.view";
+const wideScreen = () => window.matchMedia("(min-width:760px)").matches;
+let VIEW = loadJson(VIEW_KEY, null);          // "grid" | "list" | null（跟著螢幕寬度）
+const useGrid = () => VIEW ? VIEW === "grid" : wideScreen();
 const BAND_WINDOW = 90;        // 同一列裡，最早與最晚開演相差不超過幾分鐘
 const shortOf = id => (PLACE[id]||{}).short || id;
 
@@ -920,7 +928,10 @@ function renderResults(){
   }
   const picks = new Set(PICKED_IDS);
   // 時刻表：四個主要放映廳、有固定開演時間的場次；其餘一律走清單
-  const inGrid = s => GRID_VENUES.has(s.venue_id) && !s.allDay && s.kind !== "xr";
+  const grid = useGrid();
+  $("tGrid").setAttribute("aria-pressed", grid);
+  $("tGrid").textContent = grid ? "▦ 時刻表" : "☰ 清單";
+  const inGrid = s => grid && GRID_VENUES.has(s.venue_id) && !s.allDay && s.kind !== "xr";
   const table = list.filter(inGrid);
   const rest  = list.filter(s => !inGrid(s));
   const byDay = {};
@@ -935,8 +946,9 @@ function renderResults(){
     </section>`;
   }).join("");
   if(rest.length){
-    const shown = rest.slice(0, 200);
-    html += `<h3 class="listnote">${table.length ? "其他場次" : "場次"}：XR 體驗、2F 放映室、講座與展覽（${rest.length}）</h3>`;
+    const shown = rest.slice(0, 300);
+    if(table.length)
+      html += `<h3 class="listnote">其他場次：XR 體驗、2F 放映室、講座與展覽（${rest.length}）</h3>`;
     let last = null;
     shown.forEach(s => {
       if(!DAY && s.date !== last){ html += `<h3 class="vhead">${dayLabel(s.date)}</h3>`; last = s.date; }
@@ -1971,6 +1983,14 @@ $("days").addEventListener("click", e => {
 ["fVenue","fMovie","fSection"].forEach(id => $(id).addEventListener("change", renderResults));
 $("fType").addEventListener("change", () => { refreshSelects(); renderResults(); });
 $("fText").addEventListener("input", renderResults);
+// 版面切換：手機預設清單、桌機預設時刻表，按了就記住選擇
+$("tGrid").addEventListener("click", () => {
+  VIEW = useGrid() ? "list" : "grid";
+  saveJson(VIEW_KEY, VIEW);
+  renderResults();
+});
+window.addEventListener("resize", () => { if(!VIEW) renderResults(); });
+
 ["tTalk","tFit","tAge","tLiked"].forEach(id => $(id).addEventListener("click", () => {
   $(id).setAttribute("aria-pressed", !on(id)); renderResults();
 }));
