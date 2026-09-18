@@ -26,6 +26,12 @@
     --star:#D8B06A; --heart:#D9707A; --like-soft:#2A1F21; --warn-soft:#241C1B;
   }
 }
+:root[data-theme="dark"]{
+  --paper:#141615; --ink:#E4E6E2; --head:#CFE3DD; --tint:#1F2B28; --muted:#9A9993; --line:#2E3230;
+  --pine:#5FA597; --pine-soft:#1C2A27; --clash:#E0766C; --tight:#D8A05E; --card:#1B1E1D;
+  --star:#D8B06A; --heart:#D9707A; --like-soft:#2A1F21; --warn-soft:#241C1B;
+}
+:root[data-theme="dark"] .cf .dist{color:#9FB2E8}
 *{box-sizing:border-box;margin:0;padding:0}
 body{
   font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;
@@ -38,6 +44,11 @@ time,.num{font-variant-numeric:tabular-nums}
 
 header{padding:28px 0 20px;border-bottom:1px solid var(--line);margin-bottom:20px}
 h1{font-family:var(--round);font-size:26px;font-weight:400;letter-spacing:.01em;color:var(--head)}
+.headrow{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.themebtn{flex:none;padding:6px 12px;border:1px solid var(--line);border-radius:999px;background:transparent;
+  font-family:var(--round);font-size:13px;color:var(--muted);cursor:pointer}
+.themebtn:hover{border-color:var(--pine);color:var(--pine)}
+.themebtn:focus-visible{outline:2px solid var(--pine);outline-offset:2px}
 .sub{color:var(--muted);font-size:13px;margin-top:4px}
 
 .tabs{display:flex;gap:4px;margin-bottom:20px}
@@ -290,11 +301,23 @@ dialog::backdrop{background:rgba(22,22,26,.45)}
 .tg,.pill,.btn,.tab,.dchip b{font-family:var(--round)}
 </style>
 </head>
+<script>
+// 儲存的主題：light / dark，沒存過就跟著系統
+try{
+  const t = localStorage.getItem("kff2026.theme");
+  if(t === "light" || t === "dark") document.documentElement.dataset.theme = t;
+}catch(e){}
+</script>
 <body>
 <div class="wrap">
   <header>
-    <h1>2026 高雄電影節_排片小工具</h1>
-    <p class="sub" id="dataInfo">載入中…</p>
+    <div class="headrow">
+      <div>
+        <h1>2026 高雄電影節_排片小工具</h1>
+        <p class="sub" id="dataInfo">載入中…</p>
+      </div>
+      <button class="themebtn" id="btnTheme" aria-label="切換深色模式">☾ 深色</button>
+    </div>
   </header>
 
   <div class="tabs" role="tablist">
@@ -1983,6 +2006,26 @@ $("days").addEventListener("click", e => {
 ["fVenue","fMovie","fSection"].forEach(id => $(id).addEventListener("change", renderResults));
 $("fType").addEventListener("change", () => { refreshSelects(); renderResults(); });
 $("fText").addEventListener("input", renderResults);
+/* ---------- 深色模式：預設跟系統，按了就記住 ---------- */
+const THEME_KEY = "kff2026.theme";
+const sysDark = () => window.matchMedia("(prefers-color-scheme: dark)").matches;
+const isDark = () => (document.documentElement.dataset.theme || (sysDark() ? "dark" : "light")) === "dark";
+function paintThemeBtn(){
+  $("btnTheme").textContent = isDark() ? "☀ 淺色" : "☾ 深色";
+  $("btnTheme").setAttribute("aria-label", isDark() ? "切換成淺色模式" : "切換成深色模式");
+}
+$("btnTheme").addEventListener("click", () => {
+  const next = isDark() ? "light" : "dark";
+  document.documentElement.dataset.theme = next;
+  try{ localStorage.setItem(THEME_KEY, next); }catch(e){}
+  paintThemeBtn();
+});
+// 沒有手動選過時，跟著系統設定即時切換
+window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
+  if(!document.documentElement.dataset.theme) paintThemeBtn();
+});
+paintThemeBtn();
+
 // 版面切換：手機預設清單、桌機預設時刻表，按了就記住選擇
 $("tGrid").addEventListener("click", () => {
   VIEW = useGrid() ? "list" : "grid";
